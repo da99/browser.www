@@ -6,8 +6,8 @@ THIS_DIR="$(mksh_setup dirname_of_bin "$0")"
 PORT=${PORT:-"4568"}
 
 export PORT
-TEMP="/tmp/dum_dum_boom_boom"
-TEMP_DIR=${TEMP_DIR:-"/tmp/dum_dum_boom_boom"}
+TEMP="/tmp/da_standard"
+TEMP_DIR=${TEMP_DIR:-"/tmp/da_standard"}
 TEMP_SPLITS="$TEMP/splits"
 export TEMP_DIR
 mkdir -p $TEMP_SPLITS

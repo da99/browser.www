@@ -1,6 +1,6 @@
 
 specs () {
-  local +x TEMP=/tmp/dum_dum_boom_boom/build-js
+  local +x TEMP=/tmp/da_standard/build-js
   mkdir -p "$TEMP"
   cd "$THIS_DIR/bin/lib/build-js"
 
@@ -27,7 +27,7 @@ specs () {
     if [[ -f "$NAME/run.sh" ]]; then
       source "$NAME/run.sh"
     else
-      dum_dum_boom_boom build-js "$TEMP/actual/$NAME" "$NAME/input"
+      da_standard.jspp build-js "$TEMP/actual/$NAME" "$NAME/input"
     fi
     should-match-dirs          "$TEMP/actual/"      "$NAME/expect"
   done

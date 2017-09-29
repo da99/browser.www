@@ -68,6 +68,6 @@ Specs
 =====
 
 ```bash
-  dum_dum_boom_boom test-html  # All specs.
-  dum_dum_boom_boom test-html  lib/html/specs/my-dir-of-a-spec
+  da_standard.jspp test-html  # All specs.
+  da_standard.jspp test-html  lib/html/specs/my-dir-of-a-spec
 ```

@@ -1,6 +1,6 @@
 
 specs () {
-  local +x TMP="/tmp/dum_dum_boom_boom"
+  local +x TMP="/tmp/da_standard"
   reset-fs () {
     rm -rf "$TMP"
     mkdir -p "$TMP"
@@ -15,7 +15,7 @@ specs () {
   mkdir -p lib/nodejs/superman
   touch    lib/nodejs/superman/a.js
 
-  should-exit 1 'dum_dum_boom_boom duplicate-functions'
+  should-exit 1 'da_standard.jspp duplicate-functions'
   # ===========================================================================
 
 
@@ -24,7 +24,7 @@ specs () {
   cd "$TMP"
   mkdir -p lib/aquaman/a.js
   mkdir -p lib/superman/b.js
-  should-exit 0 'dum_dum_boom_boom duplicate-functions'
+  should-exit 0 'da_standard.jspp duplicate-functions'
   # ===========================================================================
 
 } # === function specs

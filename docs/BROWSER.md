@@ -9,7 +9,7 @@ Browsers:
 ========================
 
 ```html
-  <script src="/bower_components/dum_dum_boom_boom/build/browser.js"></script>
+  <script src="/bower_components/da_standard/build/browser.js"></script>
 
   <!-- on load -->
   <script>
@@ -19,7 +19,7 @@ Browsers:
 
 *NOTE*: The `browser.js` build contains all the require libs: `lodash`, `jquery`, etc.
 
-`dum_dum_boom_boom` works by sending messages (ie objects) to a `server` like object: `App`:
+`da_standard` works by sending messages (ie objects) to a `server` like object: `App`:
 
 ```javascript
    App("send message", {"dom-change": true});
@@ -66,7 +66,7 @@ data-do is the only pre-installed message function:
 ============================
 It is actually named `process_data_dos` inside
 the App object:
-[source code](https://github.com/da99/dum_dum_boom_boom/blob/master/lib/browser/data-do/_.bottom.js).
+[source code](https://github.com/da99/da_standard.jspp/blob/master/lib/browser/data-do/_.bottom.js).
 
 You associate DOM elements with the `data-do` attribute:
 

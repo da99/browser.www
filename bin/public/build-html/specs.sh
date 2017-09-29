@@ -1,6 +1,6 @@
 
 specs () {
-  local +x TEMP="/tmp/dum_dum_boom_boom"
+  local +x TEMP="/tmp/da_standard"
 
   if [[ -z "$@" && -s "$TEMP/last_failed" ]]; then # ========================
     specs "$(cat "$TEMP/last_failed")" || exit 1
@@ -38,7 +38,7 @@ specs () {
 # e.g.: test-html   path/to/spec/dir
 test-html () {
   local +x IFS=$'\n'
-  local +x TEMP="/tmp/dum_dum_boom_boom"
+  local +x TEMP="/tmp/da_standard"
   local +x DIR="$1"; shift
   local +x TARGET_DIR="$DIR"
   local +x ACTUAL="$TEMP/actual"
@@ -53,7 +53,7 @@ test-html () {
 
   STAT=0
 
-  dum_dum_boom_boom build-html "$DIR/input" "$ACTUAL" "$TEMP" >"$OUTPUT" 2>"$ERROR_MSG" || { STAT=$?; }
+  da_standard.jspp build-html "$DIR/input" "$ACTUAL" "$TEMP" >"$OUTPUT" 2>"$ERROR_MSG" || { STAT=$?; }
 
   echo "$DIR" > "$TEMP/last_failed"
 
