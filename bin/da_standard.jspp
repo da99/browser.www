@@ -3,6 +3,12 @@
 #
 local +x THE_ARGS="$@"
 local +x THIS_DIR="$(dirname "$(dirname "$(realpath "$0")")")"
+
+PATH="$PATH:$THIS_DIR/bin"
+PATH="$PATH:$THIS_DIR/../my_zsh/bin"
+PATH="$PATH:$THIS_DIR/../process/bin"
+PATH="$PATH:$THIS_DIR/../sh_color/bin"
+
 PORT=${PORT:-"4568"}
 
 export PORT
@@ -40,12 +46,14 @@ case $action in
     ;;
 
   *)
-    local +x SHELL_SCRIPT="$THIS_DIR/bin/public/${ACTION}"/_.sh
+    local +x SHELL_SCRIPT="$THIS_DIR/sh/${ACTION}"/_
     if [[ -s  "$SHELL_SCRIPT"  ]]; then
       source "$SHELL_SCRIPT"
       exit 0
     fi
-    ${ACTION} $@
+
+    echo "!!! Invalid options: $THE_ARGS"
+    exit 5
     ;;
 esac
 

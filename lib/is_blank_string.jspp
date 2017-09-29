@@ -1,0 +1,19 @@
+
+string WHITE_SPACE_REGEX = /^\s+|\s+$/g;
+
+module DA_STANDARD.STRING
+{
+
+  void is_blank_string_specs() {
+    function spec(...args) {
+    }
+    spec(is_blank_string, [""],     true);
+    spec(is_blank_string, ["   "],  true);
+    spec(is_blank_string, [" a  "], false);
+  }
+
+  bool is_blank_string(string v) {
+    return length( v.replace(WHITE_SPACE_REGEX, '') ) < 1;
+  }
+
+} // === module DA_STANDARD
