@@ -1,8 +1,8 @@
-#!/usr/bin/env mksh
+#!/usr/bin/env zsh
 #
 #
-THE_ARGS="$@"
-THIS_DIR="$(mksh_setup dirname_of_bin "$0")"
+local +x THE_ARGS="$@"
+local +x THIS_DIR="$(dirname "$(dirname "$(realpath "$0")")")"
 PORT=${PORT:-"4568"}
 
 export PORT
@@ -34,14 +34,18 @@ Orange='\e[0;33m'
 BOrange='\e[1;33m'
 
 
-
 case $action in
   help|--help)
-    mksh_setup print-help $0
+    my_zsh print-help $0
     ;;
 
   *)
-    source "$THIS_DIR/../mksh_setup/bin/source/name-to-func/_.sh"
-    name-to-func "$action"  "$@"
+    local +x SHELL_SCRIPT="$THIS_DIR/bin/public/${ACTION}"/_.sh
+    if [[ -s  "$SHELL_SCRIPT"  ]]; then
+      source "$SHELL_SCRIPT"
+      exit 0
+    fi
+    ${ACTION} $@
     ;;
 esac
+

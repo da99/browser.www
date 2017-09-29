@@ -88,7 +88,7 @@ test-html () {
       fi
     fi
   else
-    if ! mksh_setup dirs-are-equal ignore-whitespace "$ACTUAL" "$DIR/expect" >"$DIFF_OUTPUT" ; then
+    if ! sh_specs dirs-are-equal ignore-whitespace "$ACTUAL" "$DIR/expect" >"$DIFF_OUTPUT" ; then
       sh_color RED "=== {{Failed}}: spec failed "
       cat "$DIFF_OUTPUT"
       rm "$DIFF_OUTPUT"

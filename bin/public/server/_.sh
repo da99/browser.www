@@ -45,7 +45,7 @@ server () {
       mkdir -p tmp
       echo "$server_pid" > "$PID"
       sleep 0.5
-      mksh_setup max-wait 3s  "$0 server is-running"
+      process max-wait 3s  "$0 server is-running"
       echo "=== Started server: $server_pid - $$"
       ;;
 

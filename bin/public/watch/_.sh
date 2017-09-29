@@ -42,11 +42,11 @@ watch () {
   done # === while
 
   return 0 # ===================================================================
-  # mksh_setup watch "-r bin -r lib --exclude /build/" "$@"
+  # process watch "-r bin -r lib --exclude /build/" "$@"
 
   local BROWSER_ERROR="tmp/catch.browser.js.txt"
   # for FILE in $(git ls-files --cached --others --exclude-standard | grep --extended-regexp '.js|.html|bin'); do
-  #   [[ -f "$FILE" ]] && mksh_setup is-same-file "$FILE" || :
+  #   [[ -f "$FILE" ]] && sh_fs is-same-file "$FILE" || :
   # done
   echo "" > "$TEMP/CHANGE"
 
@@ -87,7 +87,7 @@ watch () {
     fi
 
     # Check if file has changed:
-    if mksh_setup is-same-file "$path"; then
+    if process is-same-file "$path"; then
       echo "=== No change: $CHANGE"
       continue
     fi # === Has file changed?

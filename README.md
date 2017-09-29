@@ -13,7 +13,7 @@ Dependencies for the dum\_dum\_boom\_boom binary:
 
 * Bower
 * NodeJS and NPM
-* [zsh](https://www.mirbsd.org/mksh.htm) shell and [mksh_setup](https://github.com/da99/mksh_setup)
+* zsh shell
 * [js\_setup](https://github.com/da99/js_setup)
 * [my_jsps](https://github.com/da99/my_jspp)
 
