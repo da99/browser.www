@@ -1,9 +1,0 @@
-
-/* import DA_STANDARD.BASE; */
-/* import DA_STANDARD.STRING; */
-import System;
-import DA_STANDARD.STRING;
-
-length_specs();
-is_blank_specs();
-
