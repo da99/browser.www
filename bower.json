@@ -3,8 +3,8 @@
   "authors": [
     "da99 <i-hate-spam-1234567@mailinator.com>"
   ],
-  "description": "[don't use this]",
-  "main": "lib/browser/build/browser.js",
+  "description": "Personal standard lib for my JS projects.",
+  "main": "lib/build.browser.js",
   "moduleType": "globals",
   "license": "MIT",
   "homepage": "https://github.com/da99/da_standard.jspp",
@@ -20,12 +20,5 @@
     "/package.json",
     "/npm-shrinkwrap.json",
     "/tmp"
-  ],
-  "dependencies": {
-    "form-to-obj": "chrisdavies/form-to-obj#latest",
-    "alite": "chrisdavies/alite#latest",
-    "lodash": "latest",
-    "jquery": "latest",
-    "mustache.js": "mustache#latest"
-  }
+  ]
 }

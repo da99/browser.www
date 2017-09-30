@@ -1,0 +1,29 @@
+
+import System;
+import DA_STANDARD.SPECS;
+
+module DA_STANDARD.ARRAY
+{
+
+  void length_specs() {
+    should_eq(1, int () { return length(["a"]); } );
+    should_eq(1, int () { return length([1]);   } );
+  }
+
+  int length(int[] v) {
+    int count = 0;
+    for(int i in v) {
+      count = count + 1;
+    }
+    return count;
+  }
+
+  int length(string[] v) {
+    int count = 0;
+    for(int i in v) {
+      count = count + 1;
+    }
+    return count;
+  }
+
+} // === module DA_STANDARD.ARRAY

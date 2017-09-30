@@ -9,9 +9,31 @@ module DA_STANDARD.SPECS
     return arg + "";
   }
 
+  void should_eq(expected, func) {
+    var util = require('util');
+    var actual = func();
+
+    if (actual != expected) {
+      throw new Error(util.inspect(func) + " EXPECTED: " + util.inspect(expected) + " ACTUAL: " + util.inspect(actual));
+    }
+
+    function inspect_func(f) {
+      return f.toString().replace("function (){return(", "").replace(/\)?;\}$/, '');
+    }
+
+    /* process.stdout.write("."); */
+    Console.log("Pass: " + util.inspect(expected) + " == " + inspect_func(func) );
+  }
+
   void should_eq(expected, func, ...args) {
     var util = require('util');
-    var actual = func.apply(null, args);
+    var actual = undefined;
+
+    if (args.length == 0) {
+      actual = func();
+    } else {
+      actual = func.apply(null, args);
+    }
 
     if (actual != expected) {
       throw new Error(util.inspect(func) + " args: " + util.inspect(args) + " EXPECTED: " + util.inspect(expected) + " ACTUAL: " + util.inspect(actual));

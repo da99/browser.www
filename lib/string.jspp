@@ -7,13 +7,25 @@ module DA_STANDARD.STRING
 {
 
   void length_specs() {
-    should_eq(2, length, "  ");
+    should_eq(2, int () { return length( "  " ); } );
     should_eq(1, length, "a");
     should_eq(5, length, " abc ");
   }
 
   int length(string raw_v) {
     return raw_v.length;
+  }
+
+  void is_whitespace_specs() {
+    should_eq(true, is_whitespace, "   ");
+    should_eq(false, is_whitespace, "");
+  }
+
+  bool is_whitespace(string v) {
+    var ans = v.match(/^\s+$/g);
+    if (ans && (ans.length || 0) > 0)
+      return true;
+    return false;
   }
 
   void is_blank_specs() {
@@ -27,4 +39,15 @@ module DA_STANDARD.STRING
     return length( v.replace(WHITE_SPACE_REGEX, '') ) < 1;
   }
 
+  void is_empty_specs() {
+    should_eq(true,  is_empty, "");
+    should_eq(false, is_empty, "a");
+    should_eq(false, is_empty, "  ");
+  }
+
+  bool is_empty(string v) {
+    return v.length === 0;
+  } // === func
+
 } // === module DA_STANDARD
+

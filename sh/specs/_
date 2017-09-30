@@ -26,17 +26,23 @@ case "$ACTION" in
 
     sh_color ORANGE "=== {{Compiling}}..."
     echo "" > $SPECS
-    echo "import System;" >> $SPECS
+
+    local +x TOP="import System;";
+    local +x BOTTOM="";
+
     for FILE in $(find lib -maxdepth 1 -type f -name '*.jspp'); do
-      echo "import DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]');" >> $SPECS
-    done
-    for NAME in $(egrep -woh '[^\ ]+_specs\(\ *\)' lib/*.jspp); do
-      echo "Console.log(\"=== $NAME ===\");" >> $SPECS
-      echo "$NAME;" >> $SPECS
-      echo "Console.log(\"\");" >> $SPECS
+      local +x FULL_NAME="DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]')"
+      TOP+="\nimport $FULL_NAME;"
+      for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$FILE"); do
+        BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
+        BOTTOM+="\n${FULL_NAME}.${func};"
+        BOTTOM+="\nConsole.log(\"\");"
+      done
     done
 
-    my_jspp __ lib/*.jspp tmp/specs.jspp -o tmp/specs.js
+    echo "$TOP" >> $SPECS
+    echo "$BOTTOM" >> $SPECS
+    my_jspp __ lib/*.jspp "$SPECS" -o tmp/specs.js
 
     sh_color ORANGE "=== {{Running}}..."
     node tmp/specs.js
