@@ -21,9 +21,9 @@ mkdir -p $TEMP_SPLITS
 mkdir -p $TEMP
 
 if [[ -z "$@" ]]; then
-  action="watch"
+  local +x ACTION="watch"
 else
-  action=$1
+  local +x ACTION=$1
   shift
 fi
 
@@ -41,7 +41,7 @@ Orange='\e[0;33m'
 BOrange='\e[1;33m'
 
 
-case $action in
+case $ACTION in
   help|--help)
     my_zsh print-help $0
     ;;

@@ -1,0 +1,32 @@
+
+external Error, process, require;
+import System;
+
+module DA_STANDARD.SPECS
+{
+
+  string inspect(arg) {
+    return arg + "";
+  }
+
+  void should_eq(expected, func, ...args) {
+    var util = require('util');
+    var actual = func.apply(null, args);
+
+    if (actual != expected) {
+      throw new Error(util.inspect(func) + " args: " + util.inspect(args) + " EXPECTED: " + util.inspect(expected) + " ACTUAL: " + util.inspect(actual));
+    }
+
+    /* process.stdout.write("."); */
+    Console.log("Pass: " + util.inspect(expected) + " == " + func.name + util.inspect(args));
+  }
+
+  void spec(f, args, expected) {
+    var actual = f.apply(args);
+    if (actual != expected) {
+      throw new Error(f + "(" + args + ") expected: " + expected + " but got " + actual);
+    }
+    Console.log("Pass: " + f + "(" + args + ")");
+  }
+
+} // === DA_STANDARD.SPECS

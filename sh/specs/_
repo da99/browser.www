@@ -1,0 +1,52 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}}
+#
+set -u -e -o pipefail
+
+local +x ORIGINAL_ARGS="$@"
+
+if [[ -z "$@" ]]; then
+  local +x ACTION="watch"
+else
+  local +x ACTION="$1"; shift
+fi
+
+case "$ACTION" in
+  watch)
+    local +x CMD="da_standard.jspp specs run"
+    ${=CMD} || sh_color RED "=== {{FAILED}}: BOLD{{$?}}"
+    process watch "-r sh -r bin -r lib -r specs" $CMD
+    ;;
+
+  run)
+    local +x SPECS="tmp/specs.jspp"
+    cd "$THIS_DIR"
+    mkdir -p tmp
+
+    sh_color ORANGE "=== {{Compiling}}..."
+    echo "" > $SPECS
+    echo "import System;" >> $SPECS
+    for FILE in $(find lib -maxdepth 1 -type f -name '*.jspp'); do
+      echo "import DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]');" >> $SPECS
+    done
+    for NAME in $(egrep -woh '[^\ ]+_specs\(\ *\)' lib/*.jspp); do
+      echo "Console.log(\"=== $NAME ===\");" >> $SPECS
+      echo "$NAME;" >> $SPECS
+      echo "Console.log(\"\");" >> $SPECS
+    done
+
+    my_jspp __ lib/*.jspp tmp/specs.jspp -o tmp/specs.js
+
+    sh_color ORANGE "=== {{Running}}..."
+    node tmp/specs.js
+    sh_color GREEN "=== {{DONE}} ===";
+    ;;
+
+  *)
+    echo "!!! Unknown arguments: $ORIGINAL_ARGS" >&2
+    exit 1
+    ;;
+esac
+
+

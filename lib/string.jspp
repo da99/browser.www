@@ -1,0 +1,30 @@
+
+import System;
+import DA_STANDARD.SPECS;
+
+
+module DA_STANDARD.STRING
+{
+
+  void length_specs() {
+    should_eq(2, length, "  ");
+    should_eq(1, length, "a");
+    should_eq(5, length, " abc ");
+  }
+
+  int length(string raw_v) {
+    return raw_v.length;
+  }
+
+  void is_blank_specs() {
+    should_eq(true,  is_blank, "");
+    should_eq(true,  is_blank, "   ");
+    should_eq(false, is_blank, " a  ");
+  }
+
+  bool is_blank(string v) {
+    System.RegExp WHITE_SPACE_REGEX = /^\s+|\s+$/g;
+    return length( v.replace(WHITE_SPACE_REGEX, '') ) < 1;
+  }
+
+} // === module DA_STANDARD
