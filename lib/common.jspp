@@ -1,0 +1,34 @@
+
+external process, require, window;
+/* process.stdout.write("."); */
+
+module DA_STANDARD.COMMON
+{
+
+  string inspect(arg) {
+    var _inspect = (typeof window == "undefined") ? require('util').inspect : function (v) { return "" + v; };
+
+    if (typeof arg == "function") {
+      return arg.toString().replace("function (){return(", "").replace(/\)?;\}$/, '');
+    }
+
+    if (arg === null)
+      return "null";
+    if (arg === undefined)
+      return "undefined";
+    if (arg === "object" ) {
+      var temp = ["a"];
+      if (arg.constructor === temp.constructor) {
+        string[] fin = ["["];
+        foreach ( var x in arg ) {
+          fin.push(inspect(x));
+        }
+        fin.push("]");
+        return fin.join(", ");
+      }
+    }
+    return _inspect(arg);
+  }
+
+
+} // === module DA_STANDARD.COMMON
