@@ -1,24 +1,45 @@
 
-external process, require, window;
+external process, require, window, Array;
 /* process.stdout.write("."); */
 
 module DA_STANDARD.COMMON
 {
 
+  bool is_array(v) {
+    return typeof(v) == "object" && v.constructor === Array;
+  }
+
+  bool is_function(v) {
+    return typeof(v) === "function";
+  }
+
+  bool is_null(v) {
+    return typeof(v) === "null";
+  }
+
+  bool is_undefined(v) {
+    return typeof(v) === "undefined";
+  }
+
+  bool is_nothing(v) {
+    return is_null(v) || is_undefined(v);
+  }
+
   string inspect(arg) {
     var _inspect = (typeof window == "undefined") ? require('util').inspect : function (v) { return "" + v; };
 
-    if (typeof arg == "function") {
+    if (is_function(arg)) {
       return arg.toString().replace("function (){return(", "").replace(/\)?;\}$/, '');
     }
 
     if (arg === null)
       return "null";
+
     if (arg === undefined)
       return "undefined";
+
     if (arg === "object" ) {
-      var temp = ["a"];
-      if (arg.constructor === temp.constructor) {
+      if (is_array(arg)) {
         string[] fin = ["["];
         foreach ( var x in arg ) {
           fin.push(inspect(x));
@@ -27,6 +48,7 @@ module DA_STANDARD.COMMON
         return fin.join(", ");
       }
     }
+
     return _inspect(arg);
   }
 

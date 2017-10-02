@@ -1,6 +1,6 @@
 
 external Error;
-import System;
+import System.Console;
 import DA_STANDARD.COMMON;
 
 module DA_STANDARD.SPECS
