@@ -1,0 +1,70 @@
+
+external document;
+
+module DA_STANDARD.DOM {
+
+  class Document {
+    public static Element querySelector(string s) {
+      return new Element(document.querySelector(s));
+    }
+
+    public static NodeList querySelectorAll(string s) {
+      return new NodeList(document.querySelectorAll(s));
+    }
+  } // class DOC
+
+  class NodeList {
+    public var origin;
+    public int length;
+
+    public NodeList(v) {
+      this.origin = v;
+      this.length = v.length;
+    }
+
+    public Element item(int i) {
+      return new Element(this.origin[i]);
+    }
+
+    public NodeList add_class(string new_name) {
+      int l = this.origin.length;
+      for(int i = 0; i < l; i++) {
+        this.item(i).add_class(new_name);
+      }
+      return this;
+    }
+
+    public NodeList remove_class(string target) {
+      int l = this.origin.length;
+      for(int i = 0; i < l; i++) {
+        this.item(i).remove_class(target);
+      }
+      return this;
+    }
+
+  } // class NodeList
+
+  class Element {
+
+    public var origin;
+
+    public Element(v) {
+      this.origin = v;
+    }
+
+    public Element add_class(string new_class) {
+      this.origin.classList.add(new_class);
+      return this;
+    }
+
+    public Element remove_class(string target) {
+      this.origin.classList.remove(target);
+      return this;
+    }
+  } // === class Element
+
+  public NodeList query(string q) {
+    return Document.querySelectorAll(q);
+  }
+
+} // === DA_STANDARD.DOM
