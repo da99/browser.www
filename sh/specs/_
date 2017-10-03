@@ -12,15 +12,53 @@ else
   local +x ACTION="$1"; shift
 fi
 
-case "$ACTION" in
-  watch)
-    local +x CMD="da_standard.jspp specs run"
+case "$(echo $ACTION $@ | xargs echo)" in
+  watch|"watch "*)
+    local +x CMD="da_standard.jspp specs run $@"
     ${=CMD} || sh_color RED "=== {{FAILED}}: BOLD{{$?}}"
     process watch "-r sh -r bin -r lib -r specs" $CMD
     ;;
 
-  run)
+  "run "*)
+    reset
+    local +x FILE="$1"; shift
     local +x SPECS="tmp/specs.jspp"
+
+    cd "$THIS_DIR"
+    mkdir -p tmp
+    sh_color ORANGE "=== {{Compiling}}..."
+    echo "" > $SPECS
+
+    local +x TOP="import System;";
+    local +x BOTTOM="";
+
+    local +x LIB_NAME="$(basename "$FILE" .jspp)"
+    local +x FULL_NAME="DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]')"
+    case "$LIB_NAME" in
+      DOM|browser) : ;;
+      *)
+        TOP+="\nimport $FULL_NAME;"
+        for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$FILE"); do
+          BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
+          BOTTOM+="\n${FULL_NAME}.${func};"
+          BOTTOM+="\nConsole.log(\"\");"
+        done
+        ;;
+    esac
+
+    echo "$TOP" >> $SPECS
+    echo "$BOTTOM" >> $SPECS
+    my_jspp __ $FILE lib/specs.jspp "$SPECS" -o tmp/specs.js
+
+    sh_color ORANGE "=== {{Running}}..."
+    node tmp/specs.js
+    sh_color GREEN "=== {{DONE}} ===";
+    ;;
+
+  run)
+    local +x FILES="$(find lib -maxdepth 1 -type f -name '*.jspp')"
+    local +x SPECS="tmp/specs.jspp"
+
     cd "$THIS_DIR"
     mkdir -p tmp
 
@@ -30,19 +68,25 @@ case "$ACTION" in
     local +x TOP="import System;";
     local +x BOTTOM="";
 
-    for FILE in $(find lib -maxdepth 1 -type f -name '*.jspp'); do
+    for FILE in ${=FILES}; do
+      local +x LIB_NAME="$(basename "$FILE" .jspp)"
       local +x FULL_NAME="DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]')"
-      TOP+="\nimport $FULL_NAME;"
-      for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$FILE"); do
-        BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
-        BOTTOM+="\n${FULL_NAME}.${func};"
-        BOTTOM+="\nConsole.log(\"\");"
-      done
+      case "$LIB_NAME" in
+        DOM|browser) : ;;
+        *)
+          TOP+="\nimport $FULL_NAME;"
+          for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$FILE"); do
+            BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
+            BOTTOM+="\n${FULL_NAME}.${func};"
+            BOTTOM+="\nConsole.log(\"\");"
+          done
+          ;;
+      esac
     done
 
     echo "$TOP" >> $SPECS
     echo "$BOTTOM" >> $SPECS
-    my_jspp __ lib/*.jspp "$SPECS" -o tmp/specs.js
+    my_jspp __ ${=FILES} "$SPECS" -o tmp/specs.js
 
     sh_color ORANGE "=== {{Running}}..."
     node tmp/specs.js

@@ -1,4 +1,6 @@
 
+external Error;
+
 module DA_STANDARD.FUNCTIONAL {
   function apply_function(f, args) {
 
@@ -52,7 +54,7 @@ module DA_STANDARD.FUNCTIONAL {
     var l = arguments.length;
     while (i < l) {
       f = arguments[i];
-      if (!_.isFunction(f))
+      if (!is_function(f))
         throw new Error('Not a function: ' + to_string(f));
       i = i + 1;
     }

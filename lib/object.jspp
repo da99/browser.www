@@ -1,4 +1,6 @@
 
+external Error;
+
 module DA_STANDARD.OBJECT {
   function create_or_update_key(orig_o, name, val) {
     var o = copy_value(orig_o);

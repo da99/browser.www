@@ -123,12 +123,12 @@ function spec() {
 
     var f, args, expect, actual;
 
-    if (raw_spec.length === 2 && _.isFunction(raw_spec[1])) {
+    if (raw_spec.length === 2 && is_function(raw_spec[1])) {
         f      = raw_spec[1];
         args   = (length(f) > 0) ? [compare_actual] : [];
         expect = raw_spec[0];
     } else {
-      if (raw_spec.length === 3 && _.isFunction(raw_spec[0])) {
+      if (raw_spec.length === 3 && is_function(raw_spec[0])) {
         f      = raw_spec[0];
         args   = raw_spec[1];
         expect = raw_spec[2];

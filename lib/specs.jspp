@@ -7,7 +7,7 @@ module DA_STANDARD.SPECS
 {
 
   string to_match_string(actual, expect) {
-    if (_.isEqual(actual, expect))
+    if (actual === expect)
       return to_string(actual) + ' === ' + to_string(expect);
     else
       return to_string(actual) + ' !== ' + to_string(expect);
@@ -230,16 +230,16 @@ module DA_STANDARD.SPECS
     return 'finish';
 
     function actual_equals_expect(actual, expect) {
-      if (_.isEqual(actual, expect))
+      if (actual === expect)
         return true;
 
-      if (_.isString(actual) && _.isRegExp(expect) && actual.match(expect))
+      if (is_string(actual) && is_regexp(expect) && actual.match(expect))
         return true;
 
       if (actual && actual.constructor === Error && expect && expect.constructor && actual.message === expect.message)
         return true;
 
-      if (actual && actual.constructor === Error && _.isRegExp(expect) && actual.message.match(expect))
+      if (actual && actual.constructor === Error && is_regexp(expect) && actual.message.match(expect))
         return true;
 
       return false;
@@ -247,16 +247,16 @@ module DA_STANDARD.SPECS
 
     function run_spec(index, raw_spec) {
 
-      var f, args, expect, actual;
+      var f, args_, expect, actual;
 
-      if (raw_spec.length === 2 && _.isFunction(raw_spec[1])) {
+      if (raw_spec.length === 2 && is_function(raw_spec[1])) {
           f      = raw_spec[1];
-          args   = (length(f) > 0) ? [compare_actual] : [];
+          args_  = (length(f) > 0) ? [compare_actual] : [];
           expect = raw_spec[0];
       } else {
-        if (raw_spec.length === 3 && _.isFunction(raw_spec[0])) {
+        if (raw_spec.length === 3 && is_function(raw_spec[0])) {
           f      = raw_spec[0];
-          args   = raw_spec[1];
+          args_  = raw_spec[1];
           expect = raw_spec[2];
         } else {
           throw new Error("Invalid spec: " + to_string(raw_spec));
@@ -264,8 +264,8 @@ module DA_STANDARD.SPECS
       }
 
       // === Handle async specs:
-      if (args[0] === compare_actual) {
-        f.apply(null, args);
+      if (args_[0] === compare_actual) {
+        f.apply(null, args_);
         wait_max(3, function () {
           if (!_.includes(App('read', 'specs done'), index))
             return false;
@@ -276,30 +276,30 @@ module DA_STANDARD.SPECS
       } // === if =======================
 
       try {
-        actual = f.apply(null, args);
+        actual = f.apply(null, args_);
       } catch (e) {
         actual = e;
       }
       compare_actual(actual);
       return true;
 
-      function compare_actual(actual) {
+      function compare_actual(actual_) {
 
         var sig = to_function_string(f, args);
-        var msg = to_match_string(actual, expect);
+        var msg_ = to_match_string(actual_, expect);
 
-        if (!actual_equals_expect(actual, expect)) {
+        if (!actual_equals_expect(actual_, expect)) {
 
-          if (is_error(actual)) {
+          if (is_error(actual_)) {
             console.error("!!! Failed w/ unexpected error: " + sig);
-            throw actual;
+            throw actual_;
           }
 
-          log(f, args, expect, actual);
-          throw new Error("!!! Failed: " + sig + ' -> ' + msg );
+          log(f, args, expect, actual_);
+          throw new Error("!!! Failed: " + sig + ' -> ' + msg_ );
         }
 
-        log('=== Passed: ' + sig + ' -> ' + msg);
+        log('=== Passed: ' + sig + ' -> ' + msg_);
 
         App('+1', 'spec.index');
         App('push into', 'specs done', index);
@@ -308,7 +308,7 @@ module DA_STANDARD.SPECS
 
   } // === function spec
 
-  spec.default_msg = function default_msg(msg) {
+  function default_msg(msg) {
     log('      ======================================');
     log('      Specs Finish: ' + to_string(msg.total) + ' tests');
     log('      ======================================');

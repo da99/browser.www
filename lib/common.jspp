@@ -1,5 +1,5 @@
 
-external process, require, window, Array;
+external Error, process, require, window, Array;
 /* process.stdout.write("."); */
 import DA_STANDARD.SPECS;
 
@@ -50,7 +50,7 @@ module DA_STANDARD.COMMON
   }
 
   bool is_regexp(val) {
-    return(val instanceOf RegExp);
+    return(val instanceof RegExp);
   }
 
   function is_null_specs() {
@@ -690,7 +690,7 @@ module DA_STANDARD.COMMON
 
   function all_funcs(arr) {
     var l = arr.length;
-    return _.isFinite(l) && l > 0 && _.all(arr, _.isFunction);
+    return _.isFinite(l) && l > 0 && _.all(arr, is_function);
   }
 
 

@@ -1,4 +1,5 @@
 
+external Error;
 import System;
 import DA_STANDARD.SPECS;
 
@@ -203,7 +204,7 @@ module DA_STANDARD.ARRAY
   }
 
   bool is_array_of_functions(a) {
-    return _.isArray(a) && length_gt(0)(a) > 0 && _.every(a, _.isFunction);
+    return _.isArray(a) && length_gt(0)(a) > 0 && _.every(a, is_function);
   } // === func
 
 
