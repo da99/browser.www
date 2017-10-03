@@ -49,5 +49,39 @@ module DA_STANDARD.STRING
     return v.length === 0;
   } // === func
 
+  function standard_name_specs() {
+    spec(standard_name, ['NAME NAME'], "name name");     // it 'lowercases names'
+    spec(standard_name, ['  name  '],  'name');          // it 'trims string'
+    spec(standard_name, ['n   aME'],   'n ame');         // it 'squeezes whitespace'
+  }
+
+  function standard_name(str) {
+    return _.trim(str).replace(/\s+/g, ' ').toLowerCase();
+  }
+
+  function split_on_specs() {
+    spec(split_on, [/;/, "a;b;c"], ['a', 'b', 'c']);
+    spec(split_on, [/;/, "a;b;c"], ['a', 'b', 'c']);
+    spec(split_on, [/;/, "a; ;c"], ['a', 'c']);
+    spec(split_on('.'), ['form.id'], ['form', 'id']);
+  }
+
+  Array<string> split_on(pattern, string str) {
+    str = trim(str);
+    if (is_empty(str))
+      return [];
+    return compact( map_x(trim.split(pattern), function (x) {
+      return !is_blank_string(x) && trim(x);
+    }));
+  }
+
+  function split_on(pattern) {
+    function _split_on_(str) {
+      return split_on(pattern, str);
+    }
+
+    return _split_on_;
+  }
+
 } // === module DA_STANDARD
 

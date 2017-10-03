@@ -1,9 +1,91 @@
 
+external Error, setTimeout;
 import System;
+import DA_STANDARD.SPECS;
+import DA_STANDARD.COMMON;
 
 module DA_STANDARD.BROWSER
 {
 
+  /*
+   * Returns the arguments passed to it as an arguments object:
+   * to_arguments(1,2,3) -> non-array, arguments: [1,2,3]
+   * to_arguments("a", "b", "c") -> non-array, arguments: ["a", "b", "c"]
+   */
+  function to_arguments() {
+    return arguments;
+  }
+
+  function arguments_are_specs() {
+    spec(
+        arguments_are,
+        [to_arguments(1), is_num, is_num],
+        new Error('Wrong # of arguments: expected: 2 actual: 1')
+        );
+  }
+
+  function arguments_are(args_o, _funcs) {
+
+    if (!is_arguments(args_o))
+      throw new Error('not arguments: ' + to_string(args_o));
+
+    var funcs = _.toArray(arguments);
+    var args  = funcs.shift();
+
+    if (args.length !== funcs.length) {
+      throw new Error('Wrong # of arguments: expected: ' + funcs.length + ' actual: ' + args.length);
+    }
+
+    for (var i = 0; i < funcs.length; i++) {
+      if (!funcs[i](args[i]))
+        throw new Error('Invalid arguments: ' + to_string(args[i]) + ' !' + to_string(funcs[i]));
+    }
+
+    return _.toArray(args);
+  }
+
+  function to_arg(val) {
+    return function (f) { return f(val); };
+  }
+
+  function do_it(num, func) {
+
+    arguments_are(arguments, is_positive, is_function);
+    for (var i = 0; i < num; i++) {
+      func();
+    }
+    return true;
+  }
+
+
+  function wait_max_specs() {
+    should_eq(5, function stops_on_return_true(fin) {
+        int i = 0;
+        wait_max(2, function () {
+            i = i + 1;
+            if (i === 5) { fin(i); return true; }
+            return false;
+            });
+        });
+  } // function wait_max_specs
+
+  void wait_max(int seconds, func) {
+
+    var ms       = seconds * 1000;
+    var total    = 0;
+    var interval = 100;
+
+    function reloop() {
+      total = total + interval;
+      if (func())
+        return true;
+      if (total > ms)
+        throw new Error('Timeout exceeded: ' + inspect(func) );
+      else
+        setTimeout(reloop, interval);
+    }
+    setTimeout(reloop, interval);
+  } // === void wait_max
 
 
 } // === module DA_STANDARD.BROWSER

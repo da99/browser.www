@@ -26,4 +26,186 @@ module DA_STANDARD.ARRAY
     return count;
   }
 
+  /*
+     each_x(function (x) { });
+   */
+  function each_x(coll, f) {
+
+    be(is_enumerable, coll);
+    be(is_function, f);
+
+    return eachs(coll, function (_i, x) {
+        return f(x);
+        });
+
+  }
+
+  function map_x(coll, f) {
+    be(is_enumerable, coll);
+    be(is_function,   f);
+    return _.map(coll, function (x) { return f(x); });
+  }
+
+  function reduce(value, _functions) {
+    var funcs = _.toArray(arguments);
+    var v     = funcs.shift();
+    return _.reduce(funcs, function (acc, f) { return f(acc); }, v);
+  }
+
+  function sort_by_length(arr) {
+    return arr.sort(function (a,b) {
+      return length(a) - length(b);
+    });
+  }
+
+  function describe_reduce(INFO, val, _args) {
+    var funcs = to_array(arguments).slice(2);
+    try {
+      return reduce.apply(null, [val].concat(funcs));
+    } catch (e) {
+      e.message = INFO + ': ' + e.message;
+      throw e;
+    }
+  } // === function
+
+  function merge_specs() {
+    spec(merge, [{a: [1]}, {a: [2,3]}], {a: [1,2,3]});
+    spec(merge, [[1], [2,3]], [1,2,3]);
+    spec(merge, [{a: 1}, {b: 2}, {c: 3}], {a: 1, b: 2, c: 3});
+  }
+
+  function merge(_args) {
+    if (arguments.length === 0)
+      throw new Error('Arguments misisng.');
+    var type = is_array(arguments[0]) ? 'array' : 'plain object';
+    var fin  = (type === 'array') ? [] : {};
+    eachs(arguments, function (kx,x) {
+      if (type === 'array' && !is_array(x))
+        throw new Error('Value needs to be an array: ' + to_string(x));
+      if (type === 'plain object'  && !is_plain_object(x))
+        throw new Error('Value needs to be a plain object: ' + to_string(x));
+
+      eachs(x, function (key, val) {
+        if ( type === 'array' ) {
+          fin.push(val);
+          return;
+        }
+
+        if (fin[key] === val || !fin.hasOwnProperty(key)) {
+          fin[key] = val;
+          return;
+        }
+
+        if (is_array(fin[key]) && is_array(val)) {
+          fin[key] = [].concat(fin[key]).concat(val);
+          return;
+        }
+
+        if (is_plain_object(fin[key]) && is_plain_object(val))  {
+          fin[key] = merge(fin[key], val);
+          return;
+        }
+
+        throw new Error('Could not merge key: [' + to_string(key) +  '] ' + to_string(fin[key]) + ' -> ' + to_string(val) );
+
+      }); // === eachs
+    });
+
+    return fin;
+  }
+
+  function reduce_eachs_specs() {
+    spec(reduce_eachs, [
+      [], [1,2], function (v, kx, x) { v.push("" + kx + x); return v; }
+    ], ["01", "12"]);
+
+    spec(reduce_eachs, [
+      [], [1,2], ["a", "b"], function (v, kx, x, ky, y) {  v.push("" + x + y); return v; }
+    ], ["1a", "1b", "2a", "2b"]);
+
+    spec(reduce_eachs, [
+      [], {one: 1, two: 2}, ["a"], function (v, kx, x, ky, y) {  v.push("" + kx + y); return v; }
+    ], ["onea", "twoa"]);
+
+    spec(reduce_eachs, [
+      [], {one: 1, two: 2}, [], ["a"], function (v, kx, x, ky, y, kz, z) {  v.push("" + kx + y); return v; }
+    ], []);
+  }
+
+  function reduce_eachs() {
+    var args = _.toArray(arguments);
+    if (args.length < 3)
+      throw new Error("Not enough args: " + to_string(args));
+    var init = args.shift();
+    var f    = args.pop();
+
+    // === Validate inputs before continuing:
+    for (var i = 0; i < args.length; i++) {
+      if (!is_enumerable(args[i]))
+          throw new Error("Invalid value for reduce_eachs: " + to_string(args[i]));
+    }
+
+    if (is_undefined(init))
+      throw new Error("Invalid value for init: " + to_string(init));
+
+
+    // === Process inputs:
+    var cols_length = length(args);
+
+    return reduce_eachs_row_maker([init], 0, _.map(args, keys_or_indexes));
+
+    function reduce_eachs_row_maker(row, col_i, key_cols) {
+      if (col_i >= cols_length) {
+        if (row.length !== f.length)
+          throw new Error("f.length (" + f.length + ") should be " + row.length + " (collection count * 2 + 1 (init))");
+        row[0] = f.apply(null, [].concat(row)); // set reduced value
+        return row[0];
+      }
+
+      var keys = key_cols[col_i].slice(0);
+      var vals = args[col_i];
+      ++col_i;
+
+      for(var i = 0; i < keys.length; i++) {
+        row.push(keys[i]); // key
+        row.push(vals[keys[i]]); // actual value
+
+        reduce_eachs_row_maker(row, col_i, key_cols);
+
+        row.pop();
+        row.pop();
+      }
+
+      return row[0];
+    }
+  } // === function: reduce_eachs
+
+  function is_enumerable_specs() {
+    spec(is_enumerable, [[]], true);
+    spec(is_enumerable, [{}], true);
+    spec(is_enumerable, [{}], true);
+  }
+
+  function is_enumerable(v) {
+
+    return is_string(v) ||
+    is_array(v)         ||
+    is_plain_object(v)  ||
+    _.isFinite(v.length) ||
+      is_arguments(v);
+  }
+
+  function is_array_of_functions_specs() {
+    spec(is_array_of_functions, [[function () {}]], true);
+    spec(is_array_of_functions, [[]], false);
+    spec(is_array_of_functions, [[1]], false);
+    spec(is_array_of_functions, [1], false);
+  }
+
+  bool is_array_of_functions(a) {
+    return _.isArray(a) && length_gt(0)(a) > 0 && _.every(a, _.isFunction);
+  } // === func
+
+
 } // === module DA_STANDARD.ARRAY
+

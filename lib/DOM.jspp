@@ -15,11 +15,13 @@ module DA_STANDARD.DOM {
 
   class NodeList {
     public var origin;
-    public int length;
+
+    public property int length () {
+      return this.origin.length;
+    }
 
     public NodeList(v) {
       this.origin = v;
-      this.length = v.length;
     }
 
     public Element item(int i) {
@@ -68,3 +70,5 @@ module DA_STANDARD.DOM {
   }
 
 } // === DA_STANDARD.DOM
+
+
