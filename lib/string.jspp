@@ -7,9 +7,9 @@ module DA_STANDARD.STRING
 {
 
   void length_specs() {
-    should_eq(2, int () { return length( "  " ); } );
-    should_eq(1, length, "a");
-    should_eq(5, length, " abc ");
+    should_eq(2, int () { return length("  ");   } );
+    should_eq(1, int () { return length("a");    } );
+    should_eq(5, int () { return length(" abc ");});
   }
 
   int length(string raw_v) {
@@ -17,8 +17,8 @@ module DA_STANDARD.STRING
   }
 
   void is_whitespace_specs() {
-    should_eq(true, is_whitespace, "   ");
-    should_eq(false, is_whitespace, "");
+    should_eq(true, bool () { return is_whitespace("   "); });
+    should_eq(false,bool () { return is_whitespace("");    });
   }
 
   bool is_whitespace(string v) {
@@ -29,9 +29,9 @@ module DA_STANDARD.STRING
   }
 
   void is_blank_specs() {
-    should_eq(true,  is_blank, "");
-    should_eq(true,  is_blank, "   ");
-    should_eq(false, is_blank, " a  ");
+    should_eq(true,  bool () { return is_blank(""); });
+    should_eq(true,  bool () { return is_blank("   "); });
+    should_eq(false, bool () { return is_blank(" a  "); });
   }
 
   bool is_blank(string v) {
@@ -40,9 +40,9 @@ module DA_STANDARD.STRING
   }
 
   void is_empty_specs() {
-    should_eq(true,  is_empty, "");
-    should_eq(false, is_empty, "a");
-    should_eq(false, is_empty, "  ");
+    should_eq(true,  bool () { return is_empty(""); });
+    should_eq(false, bool () { return is_empty("a"); });
+    should_eq(false, bool () { return is_empty("  "); });
   }
 
   bool is_empty(string v) {
@@ -50,37 +50,47 @@ module DA_STANDARD.STRING
   } // === func
 
   function standard_name_specs() {
-    spec(standard_name, ['NAME NAME'], "name name");     // it 'lowercases names'
-    spec(standard_name, ['  name  '],  'name');          // it 'trims string'
-    spec(standard_name, ['n   aME'],   'n ame');         // it 'squeezes whitespace'
+    should_eq("name name", string () { return standard_name('NAME NAME'); });  // it 'lowercases names'
+    should_eq("name",      string () { return standard_name('  name  '); });   // it 'trims string'
+    should_eq("n ame",     string () { return standard_name('n   aME');  });   // it 'squeezes whitespace'
   }
 
-  function standard_name(str) {
-    return _.trim(str).replace(/\s+/g, ' ').toLowerCase();
+  string standard_name(str) {
+    return trim(str).replace(/\s+/g, ' ').toLowerCase();
+  }
+
+  function trim_specs() {
+    should_eq("a", string () { return trim(" a    "); });
+  }
+
+  string trim(string raw) {
+    return raw.replace(/^\s+|\s+$/, "");
   }
 
   function split_on_specs() {
-    spec(split_on, [/;/, "a;b;c"], ['a', 'b', 'c']);
-    spec(split_on, [/;/, "a;b;c"], ['a', 'b', 'c']);
-    spec(split_on, [/;/, "a; ;c"], ['a', 'c']);
-    spec(split_on('.'), ['form.id'], ['form', 'id']);
+    should_eq(['a', 'b', 'c'], string[] () { return split_on(/;/, "a;b;c"); });
+    should_eq(['a', 'b', 'c'], string[] () { return split_on(/;/, "a;b;c"); });
+    should_eq(['a', 'c'],      string[] () { return split_on(/;/, "a; ;c"); });
+    should_eq(['form', 'id'],  string[] () { return split_on('.', 'form.id'); });
   }
 
-  Array<string> split_on(pattern, string str) {
-    str = trim(str);
+  string[] split_on(pattern, string raw) {
+    string str = trim(raw);
     if (is_empty(str))
       return [];
-    return compact( map_x(trim.split(pattern), function (x) {
-      return !is_blank_string(x) && trim(x);
-    }));
-  }
 
-  function split_on(pattern) {
-    function _split_on_(str) {
-      return split_on(pattern, str);
+    string[] fin = [];
+    string[] arr = str.split(pattern);
+    int len      = arr.length;
+    string x     = "";
+
+    for (int i = 0; i < len; i++) {
+       x = trim(arr[i]);
+       if (!is_empty(x))
+         fin.push(x);
     }
 
-    return _split_on_;
+    return arr;
   }
 
 } // === module DA_STANDARD

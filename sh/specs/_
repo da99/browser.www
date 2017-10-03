@@ -21,7 +21,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
 
   "run "*)
     reset
-    local +x FILE="$1"; shift
+    local +x FILES="$@"
     local +x SPECS="tmp/specs.jspp"
 
     cd "$THIS_DIR"
@@ -32,23 +32,25 @@ case "$(echo $ACTION $@ | xargs echo)" in
     local +x TOP="import System;";
     local +x BOTTOM="";
 
-    local +x LIB_NAME="$(basename "$FILE" .jspp)"
-    local +x FULL_NAME="DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]')"
-    case "$LIB_NAME" in
-      DOM|browser) : ;;
-      *)
-        TOP+="\nimport $FULL_NAME;"
-        for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$FILE"); do
-          BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
-          BOTTOM+="\n${FULL_NAME}.${func};"
-          BOTTOM+="\nConsole.log(\"\");"
-        done
-        ;;
-    esac
+    for FILE in ${=FILES} ; do
+      local +x LIB_NAME="$(basename "$FILE" .jspp)"
+      local +x FULL_NAME="DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]')"
+      case "$LIB_NAME" in
+        DOM|browser) : ;;
+        *)
+          TOP+="\nimport $FULL_NAME;"
+          for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$FILE"); do
+            BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
+            BOTTOM+="\n${FULL_NAME}.${func};"
+            BOTTOM+="\nConsole.log(\"\");"
+          done
+          ;;
+      esac
+    done
 
     echo "$TOP" >> $SPECS
     echo "$BOTTOM" >> $SPECS
-    my_jspp __ $FILE lib/specs.jspp "$SPECS" -o tmp/specs.js
+    my_jspp __ lib/common.jspp lib/string.jspp lib/specs.jspp "$SPECS" -o tmp/specs.js
 
     sh_color ORANGE "=== {{Running}}..."
     node tmp/specs.js

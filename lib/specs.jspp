@@ -6,21 +6,14 @@ import DA_STANDARD.COMMON;
 module DA_STANDARD.SPECS
 {
 
-  string to_match_string(actual, expect) {
-    if (actual === expect)
-      return to_string(actual) + ' === ' + to_string(expect);
-    else
-      return to_string(actual) + ' !== ' + to_string(expect);
-  }
-
   void should_eq(expected, func) {
     var actual = func();
 
     if (actual != expected) {
-      throw new Error(inspect(func) + " EXPECTED: " + inspect(expected) + " ACTUAL: " + inspect(actual));
+      throw new Error(to_string(func) + " EXPECTED: " + to_string(expected) + " ACTUAL: " + to_string(actual));
     }
 
-    Console.log("Pass: " + inspect(expected) + " == " + inspect(func) );
+    Console.log("Pass: " + to_string(expected) + " == " + to_string(func) );
   }
 
   void should_eq(expected, func, ...args) {
@@ -33,10 +26,10 @@ module DA_STANDARD.SPECS
     }
 
     if (actual != expected) {
-      throw new Error(inspect(func) + " args: " + inspect(args) + " EXPECTED: " + inspect(expected) + " ACTUAL: " + inspect(actual));
+      throw new Error(to_string(func) + " args: " + to_string(args) + " EXPECTED: " + to_string(expected) + " ACTUAL: " + to_string(actual));
     }
 
-    Console.log("Pass: " + inspect(expected) + " == " + func.name + inspect(args));
+    Console.log("Pass: " + to_string(expected) + " == " + func.name + to_string(args));
   }
 
   void spec(f, args, expected) {
@@ -47,271 +40,279 @@ module DA_STANDARD.SPECS
     Console.log("Pass: " + f + "(" + args + ")");
   }
 
-  function spec_next(specs) {
+  /* function spec_next(specs) { */
 
-    be(is_specs, specs);
+  /*   function to_string(v) { */
+  /*     return "" + v; */
+  /*   } */
 
-    if (specs.i === 'init') {
-        specs.i = 0;
-    } else {
-      if (specs.dones[specs.i] !== true)
-        throw new Error("Spec did not finish: " + to_string(specs.list[specs.i]));
-      specs.i = specs.i + 1;
-    }
+  /*   be(is_specs, specs); */
 
-    var i    = specs.i;
-    var list = specs.list;
-    var func = list[i];
+  /*   if (specs.i === 'init') { */
+  /*       specs.i = 0; */
+  /*   } else { */
+  /*     if (specs.dones[specs.i] !== true) */
+  /*       throw new Error("Spec did not finish: " + to_string(specs.list[specs.i])); */
+  /*     specs.i = specs.i + 1; */
+  /*   } */
 
-    // === Are all specs finished?
-    if (!func && i >= length(specs.list)) {
-      specs.total = i;
-      if (specs.total !== specs.list.length)
-        throw new Error('Not all specs finished: ' + to_string(specs.total) + ' !== ' + to_string(specs.list.length));
-      specs.on_finish(specs);
-      return length(specs.list);
-    }
+  /*   var i    = specs.i; */
+  /*   var list = specs.list; */
+  /*   var func = list[i]; */
 
-    // === Function was found?
-    if (!func) {
-      throw new Error('Spec not found: ' + to_string(i));
-    }
+  /*   // === Are all specs finished? */
+  /*   if (!func && i >= length(specs.list)) { */
+  /*     specs.total = i; */
+  /*     if (specs.total !== specs.list.length) */
+  /*       throw new Error('Not all specs finished: ' + to_string(specs.total) + ' !== ' + to_string(specs.list.length)); */
+  /*     specs.on_finish(specs); */
+  /*     return length(specs.list); */
+  /*   } */
 
-    // === Async?
-    if (length(func) === 1 ) {
-      setTimeout(function () {
-        if (!specs.dones[i])
-          throw new Error("Spec did not finish in time: " + to_string(func));
-      }, 2500);
-      func(function () {
-        specs.dones[i] = true;
-        spec_next(specs);
-      });
-      return false;
-    }
+  /*   // === Function was found? */
+  /*   if (!func) { */
+  /*     throw new Error('Spec not found: ' + to_string(i)); */
+  /*   } */
 
-    // === Regular spec, non-asyc?
-    if (length(func) === 0) {
-      func();
-      specs.dones[i] = true;
-      return spec_next(specs);
-    }
+  /*   // === Async? */
+  /*   if (length(func) === 1 ) { */
+  /*     setTimeout(function () { */
+  /*       if (!specs.dones[i]) */
+  /*         throw new Error("Spec did not finish in time: " + to_string(func)); */
+  /*     }, 2500); */
+  /*     func(function () { */
+  /*       specs.dones[i] = true; */
+  /*       spec_next(specs); */
+  /*     }); */
+  /*     return false; */
+  /*   } */
 
-    throw new Error('Function has invalid arguments: ' + to_string(func));
-  }
+  /*   // === Regular spec, non-asyc? */
+  /*   if (length(func) === 0) { */
+  /*     func(); */
+  /*     specs.dones[i] = true; */
+  /*     return spec_next(specs); */
+  /*   } */
 
-  function is_specs(specs) {
-    var is_valid_specs_i = or(is('init'), is(0), is_positive);
+  /*   throw new Error('Function has invalid arguments: ' + to_string(func)); */
+  /* } */
 
-    be(is_plain_object,  specs);
-    be(not(is_empty),    specs.list);
-    be(is_valid_specs_i, specs.i);
-    be(is_plain_object,  specs.dones);
-    return true;
-  }
+  /* function is_specs(specs) { */
+  /*   var is_valid_specs_i = or(is('init'), is(0), is_positive); */
 
-  // Specification function:
-  // Accepts:
-  //   string : 'reset'  => Reset dom for next test.
-  function spec_dom(cmd) {
+  /*   be(is_plain_object,  specs); */
+  /*   be(not(is_empty),    specs.list); */
+  /*   be(is_valid_specs_i, specs.i); */
+  /*   be(is_plain_object,  specs.dones); */
+  /*   return true; */
+  /* } */
 
-    switch (cmd) {
-      case 'reset':
-        var stage = $('#Spec_Stage');
-        if (stage.length === 0)
-          $('body').prepend('<div id="Spec_Stage"></div>');
-        else
-          stage.empty();
-        break;
+  /* // Specification function: */
+  /* // Accepts: */
+  /* //   string : 'reset'  => Reset dom for next test. */
+  /* function spec_dom(cmd) { */
 
-      default:
-        if (arguments.length !== 0)
-        throw new Error("Unknown value: " + to_string(arguments));
-    } // === switch cmd
+  /*   switch (cmd) { */
+  /*     case 'reset': */
+  /*       var stage = $('#Spec_Stage'); */
+  /*       if (stage.length === 0) */
+  /*         $('body').prepend('<div id="Spec_Stage"></div>'); */
+  /*       else */
+  /*         stage.empty(); */
+  /*       break; */
 
-    return $('#Spec_Stage');
-  }
+  /*     default: */
+  /*       if (arguments.length !== 0) */
+  /*       throw new Error("Unknown value: " + to_string(arguments)); */
+  /*   } // === switch cmd */
 
-  function spec_start() {
-  // === Expect:
-  // spec(my_func,             ["my args"],           "my expected value");
-  // spec("my expected value", function my_custom_spec() {
-  //   return "a value";
-  // });
-  //
-  // === Throws:
-  // spec(my_func, ["my args"], new Error("my expected thrown error"));
-  // spec(
-  //   new Error("my expected thrown error"),
-  //   function my_custom_spec() {
-  //     throw new Error("something");
-  //   }
-  // );
-  //
-  // === Run specs:
-  // spec('send message');
-  // spec(function (msg) {
-  //  log('Finished specs: ' + msg.total);
-  // });
-  //
-  // === Used by other functions to continue running specs:
-  // spec({
-  //    list: [],
-  //    i:"init"|0|positive,
-  //    on_finish: my_callback
-  // });
-  //
+  /*   return $('#Spec_Stage'); */
+  /* } */
+
+  /* function spec_start() { */
+  /* // === Expect: */
+  /* // spec(my_func,             ["my args"],           "my expected value"); */
+  /* // spec("my expected value", function my_custom_spec() { */
+  /* //   return "a value"; */
+  /* // }); */
+  /* // */
+  /* // === Throws: */
+  /* // spec(my_func, ["my args"], new Error("my expected thrown error")); */
+  /* // spec( */
+  /* //   new Error("my expected thrown error"), */
+  /* //   function my_custom_spec() { */
+  /* //     throw new Error("something"); */
+  /* //   } */
+  /* // ); */
+  /* // */
+  /* // === Run specs: */
+  /* // spec('send message'); */
+  /* // spec(function (msg) { */
+  /* //  log('Finished specs: ' + msg.total); */
+  /* // }); */
+  /* // */
+  /* // === Used by other functions to continue running specs: */
+  /* // spec({ */
+  /* //    list: [], */
+  /* //    i:"init"|0|positive, */
+  /* //    on_finish: my_callback */
+  /* // }); */
+  /* // */
 
 
-  // === Is there a specific spec to run?
-  (function () {
-    if (typeof window === 'undefined')
-      return;
-    var href = window.location.href;
-    var target = _.trim(href.split('?').pop() || '');
-    if (!is_empty(target) && target !== href  && target !== function_to_name("str_or_func"))
-      return false;
+  /* // === Is there a specific spec to run? */
+  /* (function () { */
+  /*   if (typeof window === 'undefined') */
+  /*     return; */
+  /*   var href = window.location.href; */
+  /*   var target = _.trim(href.split('?').pop() || ''); */
+  /*   if (!is_empty(target) && target !== href  && target !== function_to_name("str_or_func")) */
+  /*     return false; */
 
-    // === Reset DOM:
-    spec_dom('reset');
-    spec.target = target;
-  })();
-  }
+  /*   // === Reset DOM: */
+  /*   spec_dom('reset'); */
+  /*   spec.target = target; */
+  /* })(); */
+  /* } */
 
-  function spec() {
+  /* function spec() { */
 
-    var is_allowed = (
-      ( typeof(window) !== 'undefined' && $('#Spec_Stage').length === 1) ||
-        ( typeof(process) !== 'undefined' && process.argv[2] === 'test')
-    );
+  /*   var is_allowed = ( */
+  /*     ( typeof(window) !== 'undefined' && $('#Spec_Stage').length === 1) || */
+  /*       ( typeof(process) !== 'undefined' && process.argv[2] === 'test') */
+  /*   ); */
 
-    if (!is_allowed)
-      return;
+  /*   if (!is_allowed) */
+  /*     return; */
 
-    var args = _.toArray(arguments);
+  /*   var args = _.toArray(arguments); */
 
-    if (length(args) !== 1) {
-      return App('push into or create', 'specs', args);
-    } // === switch
+  /*   if (length(args) !== 1) { */
+  /*     return App('push into or create', 'specs', args); */
+  /*   } // === switch */
 
-    if (args[0] !== 'run' && !is_function(args[0]))
-      throw new Error('Unknown value: ' + to_string(args[0]));
+  /*   if (args[0] !== 'run' && !is_function(args[0])) */
+  /*     throw new Error('Unknown value: ' + to_string(args[0])); */
 
-    App('create or ignore', 'spec on finishs', []);
-    App('create or ignore', 'specs done', []);
-    var specs = App('read or create', 'specs', []);
-    var i     = App('read or create', 'spec.index', 0);
+  /*   App('create or ignore', 'spec on finishs', []); */
+  /*   App('create or ignore', 'specs done', []); */
+  /*   var specs = App('read or create', 'specs', []); */
+  /*   var i     = App('read or create', 'spec.index', 0); */
 
-    if (is_empty(specs))
-      throw new Error('No specs found.');
+  /*   if (is_empty(specs)) */
+  /*     throw new Error('No specs found.'); */
 
-    if (is_function(arguments[0]))
-      App('push into', 'spec on finishs', arguments[0]);
+  /*   if (is_function(arguments[0])) */
+  /*     App('push into', 'spec on finishs', arguments[0]); */
 
-    while (i < specs.length) {
-      if (run_spec(i, specs[i]) === 'wait')
-        return 'wait';
-      i = App('read', 'spec.index');
-    }
+  /*   while (i < specs.length) { */
+  /*     if (run_spec(i, specs[i]) === 'wait') */
+  /*       return 'wait'; */
+  /*     i = App('read', 'spec.index'); */
+  /*   } */
 
-    var passed = App('read', 'spec.index');
-    if (specs.length < passed)
-      throw new Error("Total specs: " + specs.length + " != Passed specs: " + passed);
+  /*   var passed = App('read', 'spec.index'); */
+  /*   if (specs.length < passed) */
+  /*     throw new Error("Total specs: " + specs.length + " != Passed specs: " + passed); */
 
-    var on_fins = App('read', 'spec on finishs');
-    if (is_empty(on_fins)) {
-      on_fins.push(spec.default_msg);
-    }
+  /*   var on_fins = App('read', 'spec on finishs'); */
+  /*   if (is_empty(on_fins)) { */
+  /*     on_fins.push(spec.default_msg); */
+  /*   } */
 
-    var msg = {total: specs.length};
-    for (var func_i = 0; func_i < on_fins.length; func_i++)
-      on_fins[func_i](msg);
+  /*   var msg = {total: specs.length}; */
+  /*   for (var func_i = 0; func_i < on_fins.length; func_i++) */
+  /*     on_fins[func_i](msg); */
 
-    return 'finish';
+  /*   return 'finish'; */
 
-    function actual_equals_expect(actual, expect) {
-      if (actual === expect)
-        return true;
+  /*   function actual_equals_expect(actual, expect) { */
+  /*     if (actual === expect) */
+  /*       return true; */
 
-      if (is_string(actual) && is_regexp(expect) && actual.match(expect))
-        return true;
+  /*     if (is_string(actual) && is_regexp(expect) && actual.match(expect)) */
+  /*       return true; */
 
-      if (actual && actual.constructor === Error && expect && expect.constructor && actual.message === expect.message)
-        return true;
+  /*     if (actual && actual.constructor === Error && expect && expect.constructor && actual.message === expect.message) */
+  /*       return true; */
 
-      if (actual && actual.constructor === Error && is_regexp(expect) && actual.message.match(expect))
-        return true;
+  /*     if (actual && actual.constructor === Error && is_regexp(expect) && actual.message.match(expect)) */
+  /*       return true; */
 
-      return false;
-    }
+  /*     return false; */
+  /*   } */
 
-    function run_spec(index, raw_spec) {
+  /*   function run_spec(index, raw_spec) { */
 
-      var f, args_, expect, actual;
+  /*     var f, args_, expect, actual; */
 
-      if (raw_spec.length === 2 && is_function(raw_spec[1])) {
-          f      = raw_spec[1];
-          args_  = (length(f) > 0) ? [compare_actual] : [];
-          expect = raw_spec[0];
-      } else {
-        if (raw_spec.length === 3 && is_function(raw_spec[0])) {
-          f      = raw_spec[0];
-          args_  = raw_spec[1];
-          expect = raw_spec[2];
-        } else {
-          throw new Error("Invalid spec: " + to_string(raw_spec));
-        }
-      }
+  /*     if (raw_spec.length === 2 && is_function(raw_spec[1])) { */
+  /*         f      = raw_spec[1]; */
+  /*         args_  = (length(f) > 0) ? [compare_actual] : []; */
+  /*         expect = raw_spec[0]; */
+  /*     } else { */
+  /*       if (raw_spec.length === 3 && is_function(raw_spec[0])) { */
+  /*         f      = raw_spec[0]; */
+  /*         args_  = raw_spec[1]; */
+  /*         expect = raw_spec[2]; */
+  /*       } else { */
+  /*         throw new Error("Invalid spec: " + to_string(raw_spec)); */
+  /*       } */
+  /*     } */
 
-      // === Handle async specs:
-      if (args_[0] === compare_actual) {
-        f.apply(null, args_);
-        wait_max(3, function () {
-          if (!_.includes(App('read', 'specs done'), index))
-            return false;
-          spec('run');
-          return true;
-        });
-        return "wait";
-      } // === if =======================
+  /*     // === Handle async specs: */
+  /*     if (args_[0] === compare_actual) { */
+  /*       f.apply(null, args_); */
+  /*       wait_max(3, function () { */
+  /*         if (!_.includes(App('read', 'specs done'), index)) */
+  /*           return false; */
+  /*         spec('run'); */
+  /*         return true; */
+  /*       }); */
+  /*       return "wait"; */
+  /*     } // === if ======================= */
 
-      try {
-        actual = f.apply(null, args_);
-      } catch (e) {
-        actual = e;
-      }
-      compare_actual(actual);
-      return true;
+  /*     try { */
+  /*       actual = f.apply(null, args_); */
+  /*     } catch (e) { */
+  /*       actual = e; */
+  /*     } */
+  /*     compare_actual(actual); */
+  /*     return true; */
 
-      function compare_actual(actual_) {
+  /*     function compare_actual(actual_) { */
 
-        var sig = to_function_string(f, args);
-        var msg_ = to_match_string(actual_, expect);
+  /*       var sig = to_function_string(f, args); */
+  /*       var msg_ = ""; */
+  /*       if (actual_ === expect) */
+  /*         msg_ = to_string(actual_) + ' === ' + to_string(expect); */
+  /*       else */
+  /*         msg_ = to_string(actual_) + ' !== ' + to_string(expect); */
 
-        if (!actual_equals_expect(actual_, expect)) {
+  /*       if (!actual_equals_expect(actual_, expect)) { */
 
-          if (is_error(actual_)) {
-            console.error("!!! Failed w/ unexpected error: " + sig);
-            throw actual_;
-          }
+  /*         if (is_error(actual_)) { */
+  /*           console.error("!!! Failed w/ unexpected error: " + sig); */
+  /*           throw actual_; */
+  /*         } */
 
-          log(f, args, expect, actual_);
-          throw new Error("!!! Failed: " + sig + ' -> ' + msg_ );
-        }
+  /*         log(f, args, expect, actual_); */
+  /*         throw new Error("!!! Failed: " + sig + ' -> ' + msg_ ); */
+  /*       } */
 
-        log('=== Passed: ' + sig + ' -> ' + msg_);
+  /*       log('=== Passed: ' + sig + ' -> ' + msg_); */
 
-        App('+1', 'spec.index');
-        App('push into', 'specs done', index);
-      } // === compare_actual
-    } // === function regular_spec
+  /*       App('+1', 'spec.index'); */
+  /*       App('push into', 'specs done', index); */
+  /*     } // === compare_actual */
+  /*   } // === function regular_spec */
 
-  } // === function spec
+  /* } // === function spec */
 
-  function default_msg(msg) {
-    log('      ======================================');
-    log('      Specs Finish: ' + to_string(msg.total) + ' tests');
-    log('      ======================================');
-  };
+  /* function default_msg(msg) { */
+  /*   log('      ======================================'); */
+  /*   log('      Specs Finish: ' + to_string(msg.total) + ' tests'); */
+  /*   log('      ======================================'); */
+  /* }; */
 
 } // === DA_STANDARD.SPECS

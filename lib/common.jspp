@@ -1,20 +1,30 @@
 
-external Error, process, require, window, Array;
+external NaN, TypeError, Error, process, require, window;
+
 /* process.stdout.write("."); */
 import DA_STANDARD.SPECS;
+import System.Console;
+import System;
 
 module DA_STANDARD.COMMON
 {
 
-  function is_positive(v) {
+  string[] keys(v) {
+    string[] arr = [];
+    for (string x in v) {
+      if (v.hasOwnProperty(x))
+        arr.push(x);
+    }
+    return arr;
+  }
+
+  bool is_positive(v) {
     return typeof v === 'number' && is_finite(v) && v > 0;
   }
 
-  function log(_args) {
-    if (typeof console !== 'undefined' && console.log)
-      return console.log.apply(console, arguments);
-    return false;
-  } // === func
+  bool is_finite(v) {
+    return (typeof v === 'number') && (v !== NaN);
+  }
 
   bool is_plain_object(v) {
     return typeof(v) === "object" && v.constructor === {}.constructor;
@@ -40,9 +50,9 @@ module DA_STANDARD.COMMON
     return v === true;
   }
 
-
   bool is_array(v) {
-    return typeof(v) == "object" && v.constructor === Array;
+    var a = [];
+    return typeof(v) == "object" && v.constructor === a.constructor;
   }
 
   bool is_function(v) {
@@ -54,16 +64,17 @@ module DA_STANDARD.COMMON
   }
 
   function is_null_specs() {
-    spec(is_null, [null], true);
-    spec(is_null, [undefined], false);
+    should_eq(true,  bool () { return is_null(null); });
+    should_eq(false, bool () { return is_null(undefined); });
   }
+
   bool is_null(v) {
     return v === null || typeof(v) === "null";
   }
 
   function is_undefined_specs() {
-    spec(is_undefined, [undefined], true);
-    spec(is_undefined, [null], false);
+    should_eq(true,  bool () { return is_undefined(undefined); });
+    should_eq(false, bool () { return is_undefined(null); });
   }
 
   bool is_undefined(v) {
@@ -71,11 +82,11 @@ module DA_STANDARD.COMMON
   }
 
   function is_error_specs() {
-    spec(is_error, [new Error('anything')], true);
-    spec(is_error, ['anything'],            false);
-    spec(is_error, [new Error('meh')], true);
-    spec(is_error, [new TypeError('meow')], true);
-    spec(is_error, [{stack: "", message: ""}], false);
+    should_eq(true,  bool () { return is_error(new Error('anything')); });
+    should_eq(false, bool () { return is_error('anything'); });
+    should_eq(true,  bool () { return is_error(new Error('meh')); });
+    should_eq(true,  bool () { return is_error(new TypeError('meow')); });
+    should_eq(false, bool () { return is_error({stack: "", message: ""}); });
   }
 
   function is_error(v) {
@@ -85,21 +96,12 @@ module DA_STANDARD.COMMON
     );
   }
 
-  function conditional(name, funcs) {
-    if (!_[name])
-      throw new Error("_." + name + " does not exist.");
-
-    return function (v) {
-      return _[name](funcs, function (f) { return f(v); });
-    };
-  }
-
   function is_nothing_specs() {
-    spec(is_nothing, [null],      true);
-    spec(is_nothing, [undefined], true);
-    spec(is_nothing, [[]],       false);
-    spec(is_nothing, [{}],       false);
-    spec(is_nothing, [{a: "c"}], false);
+    should_eq(true,  bool () { return is_nothing(null); });
+    should_eq(true,  bool () { return is_nothing(undefined); });
+    should_eq(false, bool () { return is_nothing([]); });
+    should_eq(false, bool () { return is_nothing({}); });
+    should_eq(false, bool () { return is_nothing({a: "c"}); });
   }
 
   bool is_nothing(v) {
@@ -111,44 +113,39 @@ module DA_STANDARD.COMMON
   }
 
   function is_empty_specs() {
-    spec(is_empty, [[]], true);
-    spec(is_empty, [{}], true);
-    spec(is_empty, [""], true);
-    spec(is_empty, [{a: "c"}], false);
-    spec(is_empty, [[1]],      false);
-    spec(is_empty, ["a"],      false);
-    spec(is_empty, [return_arguments()],      true);
-    spec(is_empty, [return_arguments(1,2,3)], false);
-    spec(is_empty, [null], new Error('invalid value: null'));
-    spec(is_empty, [undefined], new Error('invalid value: undefined'));
+    should_eq(true,  bool () { return is_empty([]); });
+    should_eq(true,  bool () { return is_empty({}); });
+    should_eq(true,  bool () { return is_empty(""); });
+    should_eq(false, bool () { return is_empty({a: "c"}); });
+    should_eq(false, bool () { return is_empty([1]); });
+    should_eq(false, bool () { return is_empty("a"); });
+    should_eq(true,  bool () { return is_empty(return_arguments()); });
+    should_eq(false, bool () { return is_empty(return_arguments(1,2,3)); });
   }
 
-  function is_empty(v) {
+  bool is_empty(string str) {
+    return str.length === 0;
+  }
 
-    if (arguments.length !== 1)
-      throw new Error("arguments.length !== 1: " + to_string(v));
+  bool is_empty(v) {
+    if (v && is_finite(v.length))
+      return v.length === 0;
 
-    if ( v === null )
-      throw new Error("invalid value: null");
-    if ( v === undefined)
-      throw new Error("invalid value: undefined");
+    if (is_plain_object(v))
+      return keys(v).length === 0;
 
-    if (_.isPlainObject(v))
-      return _.keys(v).length === 0;
+    if (is_arguments(v))
+      return v.length === 0;
 
-    var l = v.length;
-    if (!_.isFinite(l))
-      throw new Error("!!! Invalid .length property.");
-
-    return l === 0;
+    throw new Error("Invalid value for is_empty: " + to_string(v));
   } // === func
 
   function is_something_specs() {
-    spec(is_something, [null],      false);
-    spec(is_something, [undefined], false);
-    spec(is_something, [[]],       true);
-    spec(is_something, [{}],       true);
-    spec(is_something, [{a: "c"}], true);
+    should_eq(false, bool () { return is_something(null); });
+    should_eq(false, bool () { return is_something(undefined); });
+    should_eq(true,  bool () { return is_something([]); });
+    should_eq(true,  bool () { return is_something({}); });
+    should_eq(true,  bool () { return is_something({a: "c"}); });
   }
 
   function is_something(v) {
@@ -159,569 +156,473 @@ module DA_STANDARD.COMMON
   }
 
   string inspect(arg) {
-    var _inspect = (typeof window == "undefined") ? require('util').inspect : function (v) { return "" + v; };
+    return to_string(arg);
+  }
 
-    if (is_function(arg)) {
+  function to_string_specs() {
+    should_eq('null',              string () { return to_string(null); });
+    should_eq('undefined',         string () { return to_string(undefined); });
+    should_eq('[1]',               string () { return to_string([1]); });
+    should_eq('"yo yo"',           string () { return to_string('yo yo'); });
+    should_eq('{"a":"b","c":"d"}', string () { return to_string({a:'b', c:'d'}); });
+  }
+
+  string to_string(string str) {
+    return '"' + str + '"';
+  }
+
+  string to_string(bool b) {
+    if (b === false)     return 'false';
+    if (b === true)      return 'true';
+  }
+
+  string to_string(arg) {
+    if (arg === null)      return 'null';
+    if (arg === undefined) return 'undefined';
+
+    if (is_function(arg))
       return arg.toString().replace("function (){return(", "").replace(/\)?;\}$/, '');
-    }
 
-    if (arg === null)
-      return "null";
+    if (is_function(arg))
+      return (arg.name) ? arg.name + ' (function)' : arg.toString();
 
-    if (arg === undefined)
-      return "undefined";
+    if (is_error(arg))
+      return '[Error] ' + to_string(arg.message);
+
 
     if (arg === "object" ) {
       if (is_array(arg)) {
         string[] fin = ["["];
         foreach ( var x in arg ) {
-          fin.push(inspect(x));
+          fin.push(to_string(x));
         }
         fin.push("]");
         return fin.join(", ");
       }
+
+      string[] fin = ["{"];
+      for(var x in arg) {
+        if (arg.hasOwnProperty(x)) {
+          fin.push(to_string(arg[x]));
+        }
+      }
+      fin.push("}");
+      return fin.join(", ");
     }
 
+    if ( is_arguments(arg) )
+      return to_string(to_array(arg));
+
+    var _inspect = (typeof window == "undefined") ? require('util').inspect : function (v) { return "" + v; };
     return _inspect(arg);
-  }
+  } // === string to_string
 
   function is_arguments_specs() {
-    spec(is_arguments, [return_arguments()], true);
-    spec(is_arguments, [[]], false);
-    spec(is_arguments, [{}], false);
+    should_eq(true,  bool () { return is_arguments(return_arguments()); });
+    should_eq(false, bool () { return is_arguments([]); });
+    should_eq(false, bool () { return is_arguments({}); });
   }
 
   function is_arguments(v) {
-    return is_something(v) &&
-      v.constructor === arguments.constructor &&
-      is_finite(v.length) &&
-      typeof(v) === "object";
+    return is_something(v) && v.constructor === arguments.constructor;
   }
 
-  function to_string_specs() {
-    spec(to_string, [null], 'null');
-    spec(to_string, [undefined], 'undefined');
-    spec(to_string, [[1]], '[1]');
-    spec(to_string, ['yo yo'], '"yo yo"');
-    spec(to_string, [{a:'b', c:'d'}], '{"a":"b","c":"d"}');
-  }
-
-  string to_string(val) {
-
-    if (val === null)      return 'null';
-    if (val === undefined) return 'undefined';
-    if (val === false)     return 'false';
-    if (val === true)      return 'true';
-
-    if (is_array(val))
-      return  '['+_.map(val, to_string).join(", ") + ']';
-
-    if (is_string(val))
-      return '"' + val + '"';
-
-    if ( is_arguments(val) )
-      return to_string(to_array(val));
-
-    if (is_plain_object(val)) {
-
-      return '{' + reduce(keys(val), function (acc, k) {
-          acc.push(to_string(k) + ':' + to_string(val[k]));
-          return acc;
-          }, []).join(",") + '}';
-    }
-
-    if (is_function(val) && val.hasOwnProperty('to_string_name'))
-      return val.to_string_name;
-
-    if (is_function(val))
-      return (val.name) ? val.name + ' (function)' : val.toString();
-
-    if (is_string(val))
-      return '"' + val + '"';
-
-    if (is_array(val))
-      return '[' + map(to_array(val), to_string).join(', ') + '] (Array)';
-
-    if (is_arguments(val))
-      return '[' + map(to_array(val), to_string).join(', ') + '] (arguments)';
-
-    if (is_error(val))
-      return '[Error] ' + to_string(val.message);
-    return val.toString();
-
-  } // === func
-
-  function or(_funcs) {
-    var funcs = _.toArray(arguments);
-    return function (v) {
-      return !!_.find(funcs, function (f) { return f(v) === true; });
-    };
-  }
-
-  function and(_funcs) {
-    var funcs = to_array(arguments);
-    return function (v) {
-      for (var i = 0; i < length(funcs); i++) {
-        if (!funcs[i](v))
-          return false;
-      }
-      return true;
-    };
-  }
-
-  function not_specs() {
-    spec(true, function () {  return not(is_something)(null); });
-    spec(true, function () {  return not(length_gt(2))([1]); });
-    spec(false, function () {  return not(is_something)(1); });
-    spec(false, function () {  return not(is(1))(1); });
-    spec(not, [is_something, is_null], /should be/);
-  }
-
-  function not(func) {
-    reduce(arguments, length, be(is(1)));
-    var l = arguments.length;
-    if (!is_function(func))
-      throw new Error('Not a function: ' + to_string(func));
-
-    return function _not_(val) {
-      if (arguments.length !== 1)
-        throw new Error('arguments.length !== 1');
-      var result = func(val);
-      if (!is_boolean(result))
-        throw new Error('Function did not return boolean: ' + to_string(func) + ' -> ' + to_string(result));
-      return !result;
-    };
-  }
-
-  function to_default_specs() {
-    spec(to_default, [1,undefined], 1);
-    spec(to_default, [2,null], 2);
-    spec(to_default, [3,[]], []);
-  }
-
-
-  function to_default(valid) {
-
-    if (length(arguments) === 2) {
-      var v = arguments[1];
-      if (v === null || v === undefined)
-        return valid;
-      return v;
-    }
-
-    return function (v) { return to_default(valid, v); };
-  }
-
-  function has_property_of(name, type) {
-
-    var f = function has_property_of(o) {
-      return typeof o[name] === type;
-    };
-
-    return set_function_string_name(f, arguments);
-  }
-
-  function key_to_bool_specs() {
-    spec(key_to_bool, ['time', {time: 'morning'}], true); // it 'returns true if key is "truthy"'
-    spec(key_to_bool, ['!time', {time: false}], true); // it 'returns true if: !key , key is !truthy'
-    spec(key_to_bool, ['!first.second.third', {first: {second: { third: true}}}], true); // it 'handles nested keys'
-    spec(key_to_bool, ['!!!first', {first: false}], true); // it 'handles multiple exclamation marks'
-    spec(key_to_bool, ['first', {}], undefined); // it 'returns undefined if one non-nested key is specified, but not found'
-    spec(key_to_bool, ['is_factor', {is_factor: true}], true);
-    spec(key_to_bool, ['!is_factor', {is_factor: false}], true);
-    spec(key_to_bool, ['is_factor', {is_ruby: false}], undefined);
-    spec(key_to_bool, ['is_happy', {is_happy: true}], true);
-    spec(key_to_bool, ['!is_happy', {is_happy: true}], false);
-    spec(key_to_bool, ['is_happy',  {is_happy: false}], false);
-    spec(key_to_bool, ['!is_happy', {is_happy: false}], true);
-    spec(key_to_bool, [['is_factor'], {}], new Error("[\"is_factor\"] should be: is_string (function)"));
-  }
-
-  function key_to_bool(raw_key, data) {
-
-    var FRONT_BANGS = /^\!+/;
-
-    var key = reduce(
-      raw_key,
-      be(is_string),
-      _.trim,
-      be(not(is_empty))
-    );
-
-    var bang_match = key.match(FRONT_BANGS);
-    var dots       = ( bang_match ? key.replace(bang_match[0], '') : key ).split('.');
-    var keys       = _.map( dots, _.trim );
-
-    var current = data;
-    var ans  = false;
-
-    _.find(keys, function (key) {
-      if (_.has(current, key)) {
-        current = data[key];
-        ans = !!current;
-      } else {
-        ans = undefined;
-      }
-
-      return !ans;
-    });
-
-    if (ans === undefined)
-      return ans;
-
-    if (bang_match) {
-      _.times(bang_match[0].length, function () {
-        ans = !ans;
-      });
-    }
-
-    return ans;
-  } // === func
-
-  bool is_function(v) {
-    return typeof v === 'function';
-  }
-
-  function set_function_string_name(f, args) {
-    if (f.to_string_name)
-      throw new Error('.to_string_name alread set: ' + to_string(f.to_string_name));
-    f.to_string_name = function_sig(f, args);
-    return f;
-  }
-
-  string function_sig(f, args) {
-    return function_to_name(f) + '(' + _.map(args, to_string).join(',')  + ')';
-  }
-
-  function function_to_name_specs() {
-    spec(function_to_name, ["function my_name() {}"], "my_name");
-  }
-
-  function function_to_name(f) {
-    var WHITESPACE = /\s+/g;
-    return f.to_string_name || f.toString().split('(')[0].split(WHITESPACE)[1] || f.toString();
-  }
-
-  function to_function_string(f, args) {
-    return function_to_name(f) + '(' + _.map(args, to_string).join(', ') + ')';
-  }
-
-  bool all(_funcs) {
-    var _and = and.apply(null, arguments);
-    return function (arr) {
-      for(var i = 0; i < length(arr); i++){
-        if (!_and(arr[i]))
-          return false;
-      }
-      return true;
-    };
-  }
-
-  function own_property_specs() {
-    spec(3, function own_property_returns_own_property() {
-      return own_property('num')({num: 3});
-    });
-    spec(own_property('num'), [{n:4}], new Error('Key not found: "num" in {"n":4}'));
-  }
-
-  function own_property(name) {
-
-    return function _own_property_(o) {
-      if (!o.hasOwnProperty(name))
-        throw new Error('Key not found: ' + to_string(name) + ' in ' + to_string(o));
-      return o[name];
-    };
-  } // === func own_property
-
-  function msg_match_specs() {
-    spec(msg_match, [1,1], true);
-    spec(msg_match, ["a", "a"], true);
-    spec(msg_match, [[1],[1]], true);
-    spec(msg_match, [[1,[2]],[1,[2]]], true);
-    spec(msg_match, [{a:"b"}, {a:"b",c:"d"}], true);
-    spec(msg_match, [{a:is_string}, {a:"b"}], true);
-    spec(msg_match, [{}, {a:"b"}], false);
-    spec(msg_match, [{}, {}], true);
-    spec(msg_match, [[], []], true);
-  }
-
-  bool msg_match(pattern, msg) {
-
-    if (_.isEqual(pattern, msg))
-      return true;
-
-    if (is_plain_object(pattern) && is_plain_object(msg)) {
-      if (is_empty(pattern) !== is_empty(msg))
-        return false;
-
-      return !_.find(_.keys(pattern), function (key) {
-        var target = pattern[key];
-        if (msg[key] === target)
-          return !true;
-        if (is_function(target))
-          return !be(is_boolean, target(msg[key]));
-        return !false;
-      });
-    }
-
-    return false;
-  }
-
-  function copy_value_specs() {
-  spec({a:{b:"c"}, b:true}, function () { // Does not alter orig.
-    var orig = {a:{b:"c"}, b:true};
-    var copy = copy_value(orig);
-    copy.a.b = "1";
-    return orig;
-  });
-
-  spec(copy_value, [[1, copy_value], is_function], [1, copy_value]);
-  }
-
-  function copy_value(v) {
-    var allow_these = [];
-
-    if (length(arguments) < 2) {
-      arguments_are(arguments, is_something);
-    } else {
-      allow_these = _.toArray(arguments).slice(1);
-    }
-
-    var type = typeof v;
-    if (type === 'string' || type === 'number' || is_boolean(v))
-      return v;
-
-    if (is_array(v))
-      return _.map(v, function (new_v) { return copy_value.apply(null, [new_v].concat(allow_these)); });
-
-    if (is_plain_object(v))
-      return reduce_eachs({}, v, function (acc, kx, x) {
-        acc[kx] = copy_value.apply(null, [x].concat(allow_these));
-        return acc;
-      });
-
-    var return_val = _.find(allow_these, function (f) { return f(v); });
-    if (return_val)
-      return v;
-
-    return v;
-    // throw new Error('Value can\'t be copied: ' + to_string(v));
-  }
-
-  function has_length_specs() {
-    spec(true, function has_length_returns_function() {
-      return is_function(has_length(1));
-    });
-
-    spec(true, function has_length_returns_function_comparing_length() {
-      return has_length(1)([1]);
-    });
-
-    spec(true, function has_length_returns_function_comparing_length_of_function() {
-      return has_length(2)(function (a,b) {});
-    });
-
-    spec(
-      function () { // returns function that returns false on length mismatch
-        return has_length(3)([1,2]);
-      },
-      [],
-      new Error("[1, 2].length !== 3")
-    );
-  }
-
-  function has_length(num) {
-    return function _has_length_(val) {
-      arguments_are(arguments, is_something);
-      if (val.length === num)
-        return true;
-      throw new Error(to_string(val) + '.length !== ' + to_string(num));
-    };
-  }
-
-  function is_specs() {
-    spec(true,  function () { return is(5)(5); });
-    spec(false, function () { return is("a")("b"); });
-  }
-
-  function is(target) {
-    return function (val) { return val === target; };
-  }
-
-  function keys_or_indexes(v) {
-    if (is_plain_object(v))
-      return _.keys(v);
-
-    var a = [];
-    for(var i = 0; i < v.length; i++) {
-      a[i] = i;
-    }
-    return a;
-  }
-
-  function to_value_specs() {
-    spec('"4"', function to_value_returns_a_value() {
-      return to_value(4, to_string, to_string);
-    });
-
-    spec(5, function to_value_returns_first_value_if_no_funcs() {
-      return to_value(5);
-    });
-  }
-
-  function to_value(val, _funcs) {
-    be(is_something, val);
-    be(not(is_empty), arguments);
-
-    var i = 1, l = arguments.length;
-    while (i < l) {
-      val = arguments[i](val);
-      i = i + 1;
-    }
-    return val;
-  }
+  /* function to_default_specs() { */
+  /*   should_eq(to_default, [1,undefined], 1); */
+  /*   should_eq(to_default, [2,null], 2); */
+  /*   should_eq(to_default, [3,[]], []); */
+  /* } */
+
+
+  /* function to_default(valid) { */
+
+  /*   if (length(arguments) === 2) { */
+  /*     var v = arguments[1]; */
+  /*     if (v === null || v === undefined) */
+  /*       return valid; */
+  /*     return v; */
+  /*   } */
+
+  /*   return function (v) { return to_default(valid, v); }; */
+  /* } */
+
+  /* function has_property_of(name, type) { */
+
+  /*   var f = function has_property_of(o) { */
+  /*     return typeof o[name] === type; */
+  /*   }; */
+
+  /*   return set_function_string_name(f, arguments); */
+  /* } */
+
+  /* function key_to_bool_specs() { */
+  /*   should_eq(key_to_bool, ['time', {time: 'morning'}], true); // it 'returns true if key is "truthy"' */
+  /*   should_eq(key_to_bool, ['!time', {time: false}], true); // it 'returns true if: !key , key is !truthy' */
+  /*   should_eq(key_to_bool, ['!first.second.third', {first: {second: { third: true}}}], true); // it 'handles nested keys' */
+  /*   should_eq(key_to_bool, ['!!!first', {first: false}], true); // it 'handles multiple exclamation marks' */
+  /*   should_eq(key_to_bool, ['first', {}], undefined); // it 'returns undefined if one non-nested key is specified, but not found' */
+  /*   should_eq(key_to_bool, ['is_factor', {is_factor: true}], true); */
+  /*   should_eq(key_to_bool, ['!is_factor', {is_factor: false}], true); */
+  /*   should_eq(key_to_bool, ['is_factor', {is_ruby: false}], undefined); */
+  /*   should_eq(key_to_bool, ['is_happy', {is_happy: true}], true); */
+  /*   should_eq(key_to_bool, ['!is_happy', {is_happy: true}], false); */
+  /*   should_eq(key_to_bool, ['is_happy',  {is_happy: false}], false); */
+  /*   should_eq(key_to_bool, ['!is_happy', {is_happy: false}], true); */
+  /*   should_eq(key_to_bool, [['is_factor'], {}], new Error("[\"is_factor\"] should be: is_string (function)")); */
+  /* } */
+
+  /* function key_to_bool(raw_key, data) { */
+
+  /*   var FRONT_BANGS = /^\!+/; */
+
+  /*   var key = reduce( */
+  /*     raw_key, */
+  /*     be(is_string), */
+  /*     _.trim, */
+  /*     be(not(is_empty)) */
+  /*   ); */
+
+  /*   var bang_match = key.match(FRONT_BANGS); */
+  /*   var dots       = ( bang_match ? key.replace(bang_match[0], '') : key ).split('.'); */
+  /*   var keys       = _.map( dots, _.trim ); */
+
+  /*   var current = data; */
+  /*   var ans  = false; */
+
+  /*   _.find(keys, function (key) { */
+  /*     if (_.has(current, key)) { */
+  /*       current = data[key]; */
+  /*       ans = !!current; */
+  /*     } else { */
+  /*       ans = undefined; */
+  /*     } */
+
+  /*     return !ans; */
+  /*   }); */
+
+  /*   if (ans === undefined) */
+  /*     return ans; */
+
+  /*   if (bang_match) { */
+  /*     _.times(bang_match[0].length, function () { */
+  /*       ans = !ans; */
+  /*     }); */
+  /*   } */
+
+  /*   return ans; */
+  /* } // === func */
+
+  /* bool is_function(v) { */
+  /*   return typeof v === 'function'; */
+  /* } */
+
+  /* function set_function_string_name(f, args) { */
+  /*   if (f.to_string_name) */
+  /*     throw new Error('.to_string_name alread set: ' + to_string(f.to_string_name)); */
+  /*   f.to_string_name = function_sig(f, args); */
+  /*   return f; */
+  /* } */
+
+  /* string function_sig(f, args) { */
+  /*   return function_to_name(f) + '(' + _.map(args, to_string).join(',')  + ')'; */
+  /* } */
+
+  /* function function_to_name_specs() { */
+  /*   should_eq(function_to_name, ["function my_name() {}"], "my_name"); */
+  /* } */
+
+  /* function function_to_name(f) { */
+  /*   var WHITESPACE = /\s+/g; */
+  /*   return f.to_string_name || f.toString().split('(')[0].split(WHITESPACE)[1] || f.toString(); */
+  /* } */
+
+  /* function to_function_string(f, args) { */
+  /*   return function_to_name(f) + '(' + _.map(args, to_string).join(', ') + ')'; */
+  /* } */
+
+  /* bool all(_funcs) { */
+  /*   var _and = and.apply(null, arguments); */
+  /*   return function (arr) { */
+  /*     for(var i = 0; i < length(arr); i++){ */
+  /*       if (!_and(arr[i])) */
+  /*         return false; */
+  /*     } */
+  /*     return true; */
+  /*   }; */
+  /* } */
+
+  /* function own_property_specs() { */
+  /*   should_eq(3, function own_property_returns_own_property() { */
+  /*     return own_property('num')({num: 3}); */
+  /*   }); */
+  /*   should_eq(own_property('num'), [{n:4}], new Error('Key not found: "num" in {"n":4}')); */
+  /* } */
+
+  /* function own_property(name) { */
+
+  /*   return function _own_property_(o) { */
+  /*     if (!o.hasOwnProperty(name)) */
+  /*       throw new Error('Key not found: ' + to_string(name) + ' in ' + to_string(o)); */
+  /*     return o[name]; */
+  /*   }; */
+  /* } // === func own_property */
+
+  /* function msg_match_specs() { */
+  /*   should_eq(msg_match, [1,1], true); */
+  /*   should_eq(msg_match, ["a", "a"], true); */
+  /*   should_eq(msg_match, [[1],[1]], true); */
+  /*   should_eq(msg_match, [[1,[2]],[1,[2]]], true); */
+  /*   should_eq(msg_match, [{a:"b"}, {a:"b",c:"d"}], true); */
+  /*   should_eq(msg_match, [{a:is_string}, {a:"b"}], true); */
+  /*   should_eq(msg_match, [{}, {a:"b"}], false); */
+  /*   should_eq(msg_match, [{}, {}], true); */
+  /*   should_eq(msg_match, [[], []], true); */
+  /* } */
+
+  /* bool msg_match(pattern, msg) { */
+
+  /*   if (_.isEqual(pattern, msg)) */
+  /*     return true; */
+
+  /*   if (is_plain_object(pattern) && is_plain_object(msg)) { */
+  /*     if (is_empty(pattern) !== is_empty(msg)) */
+  /*       return false; */
+
+  /*     return !_.find(_.keys(pattern), function (key) { */
+  /*       var target = pattern[key]; */
+  /*       if (msg[key] === target) */
+  /*         return !true; */
+  /*       if (is_function(target)) */
+  /*         return !be(is_boolean, target(msg[key])); */
+  /*       return !false; */
+  /*     }); */
+  /*   } */
+
+  /*   return false; */
+  /* } */
+
+  /* function copy_value_specs() { */
+  /* should_eq({a:{b:"c"}, b:true}, function () { // Does not alter orig. */
+  /*   var orig = {a:{b:"c"}, b:true}; */
+  /*   var copy = copy_value(orig); */
+  /*   copy.a.b = "1"; */
+  /*   return orig; */
+  /* }); */
+
+  /* should_eq(copy_value, [[1, copy_value], is_function], [1, copy_value]); */
+  /* } */
+
+  /* function copy_value(v) { */
+  /*   var allow_these = []; */
+
+  /*   if (length(arguments) < 2) { */
+  /*     arguments_are(arguments, is_something); */
+  /*   } else { */
+  /*     allow_these = _.toArray(arguments).slice(1); */
+  /*   } */
+
+  /*   var type = typeof v; */
+  /*   if (type === 'string' || type === 'number' || is_boolean(v)) */
+  /*     return v; */
+
+  /*   if (is_array(v)) */
+  /*     return _.map(v, function (new_v) { return copy_value.apply(null, [new_v].concat(allow_these)); }); */
+
+  /*   if (is_plain_object(v)) */
+  /*     return reduce_eachs({}, v, function (acc, kx, x) { */
+  /*       acc[kx] = copy_value.apply(null, [x].concat(allow_these)); */
+  /*       return acc; */
+  /*     }); */
+
+  /*   var return_val = _.find(allow_these, function (f) { return f(v); }); */
+  /*   if (return_val) */
+  /*     return v; */
+
+  /*   return v; */
+  /*   // throw new Error('Value can\'t be copied: ' + to_string(v)); */
+  /* } */
+
+  /* function has_length_specs() { */
+  /*   should_eq(true, function has_length_returns_function() { */
+  /*     return is_function(has_length(1)); */
+  /*   }); */
+
+  /*   should_eq(true, function has_length_returns_function_comparing_length() { */
+  /*     return has_length(1)([1]); */
+  /*   }); */
+
+  /*   should_eq(true, function has_length_returns_function_comparing_length_of_function() { */
+  /*     return has_length(2)(function (a,b) {}); */
+  /*   }); */
+
+  /*   should_eq( */
+  /*     function () { // returns function that returns false on length mismatch */
+  /*       return has_length(3)([1,2]); */
+  /*     }, */
+  /*     [], */
+  /*     new Error("[1, 2].length !== 3") */
+  /*   ); */
+  /* } */
+
+  /* function has_length(num) { */
+  /*   return function _has_length_(val) { */
+  /*     arguments_are(arguments, is_something); */
+  /*     if (val.length === num) */
+  /*       return true; */
+  /*     throw new Error(to_string(val) + '.length !== ' + to_string(num)); */
+  /*   }; */
+  /* } */
+
+  /* function is_specs() { */
+  /*   should_eq(true,  function () { return is(5)(5); }); */
+  /*   should_eq(false, function () { return is("a")("b"); }); */
+  /* } */
+
+  /* function is(target) { */
+  /*   return function (val) { return val === target; }; */
+  /* } */
+
+  /* function keys_or_indexes(v) { */
+  /*   if (is_plain_object(v)) */
+  /*     return _.keys(v); */
+
+  /*   var a = []; */
+  /*   for(var i = 0; i < v.length; i++) { */
+  /*     a[i] = i; */
+  /*   } */
+  /*   return a; */
+  /* } */
+
+  /* function to_value_specs() { */
+  /*   should_eq('"4"', function to_value_returns_a_value() { */
+  /*     return to_value(4, to_string, to_string); */
+  /*   }); */
+
+  /*   should_eq(5, function to_value_returns_first_value_if_no_funcs() { */
+  /*     return to_value(5); */
+  /*   }); */
+  /* } */
+
+  /* function to_value(val, _funcs) { */
+  /*   be(is_something, val); */
+  /*   be(not(is_empty), arguments); */
+
+  /*   var i = 1, l = arguments.length; */
+  /*   while (i < l) { */
+  /*     val = arguments[i](val); */
+  /*     i = i + 1; */
+  /*   } */
+  /*   return val; */
+  /* } */
+
+
+  function return_arguments(...args) { return args; }
+  function to_arguments() { return arguments; }
 
   function to_array_specs() {
-  spec(to_array, [[1,2,3]], [1,2,3]);
-  spec(to_array, [to_arguments(1,2,3)], [1,2,3]);
-  spec(to_array, [1,2,3], /Invalid value for /);
+    should_eq([1,2,3], function () { return to_array([1,2,3]); });
+    should_eq([1,2,3], function () { return to_array(return_arguments(1,2,3)); });
   }
-
-  function return_arguments() { return arguments; }
 
   function to_array(val) {
-    if (!_.isArray(val) && val.constructor != arguments.constructor)
+    if (!is_array(val) && val.constructor != arguments.constructor)
       throw new Error("Invalid value for to_array: " + to_string(val));
 
-    return _.toArray(val);
+    var arr = [];
+    int len = val.length;
+    for (int i = 0; i < len; i++) {
+      arr.push(val[i]);
+    }
+    return arr;
   } // === func
 
-  function combine(_vals) {
-    var vals = _.toArray(arguments);
+  /* function to_slot(func, _args) { */
 
-    if (is_plain_object(vals)) {
-      return _.extend.apply(null, [{}].concat(vals));
-    }
+  /*   var ARGS = to_array(arguments).slice(1); */
 
-    if (all(is_array)(vals))
-      return [].concat(vals);
+  /*   return function _to_slot_() { */
 
-    throw new Error("Only Array of Arrays or Plain Objects allowed: " + to_string(arguments));
-  }
+  /*     var MIDDLE_ARGS = to_array(arguments); */
+  /*     var FIN_ARGS = reduce_eachs([], ARGS, function (array, _i, x) { */
+  /*       if (x !== '{{_}}') { */
+  /*         array.push(x); */
+  /*         return array; */
+  /*       } */
 
-  function to_slot(func, _args) {
+  /*       if (is_empty(MIDDLE_ARGS)) */
+  /*         throw new Error("Not enough arguments for: " + to_string(func) + " args: " + length(MIDDLE_ARGS) + " != " + length(ARGS)); */
 
-    var ARGS = to_array(arguments).slice(1);
+  /*       array.push(MIDDLE_ARGS.shift()); */
 
-    return function _to_slot_() {
+  /*       return array; */
+  /*     }); */
 
-      var MIDDLE_ARGS = to_array(arguments);
-      var FIN_ARGS = reduce_eachs([], ARGS, function (array, _i, x) {
-        if (x !== '{{_}}') {
-          array.push(x);
-          return array;
-        }
+  /*     if (!is_empty(MIDDLE_ARGS)) */
+  /*       throw new Error("Extra args for : " + to_string(func) + " extra: " + length(MIDDLE_ARGS)); */
 
-        if (is_empty(MIDDLE_ARGS))
-          throw new Error("Not enough arguments for: " + to_string(func) + " args: " + length(MIDDLE_ARGS) + " != " + length(ARGS));
+  /*     return func.apply(null, FIN_ARGS); */
+  /*   }; // === return */
 
-        array.push(MIDDLE_ARGS.shift());
+  /* } // === function to_slot */
 
-        return array;
-      });
+  /* function replace(pattern, new_value) { */
+  /*   if (length(arguments) === 3) */
+  /*     return arguments[2].replace(arguments[0], arguments[1]); */
 
-      if (!is_empty(MIDDLE_ARGS))
-        throw new Error("Extra args for : " + to_string(func) + " extra: " + length(MIDDLE_ARGS));
+  /*   return function (v) { */
+  /*     return v.replace(pattern, new_value); */
+  /*   }; */
+  /* } */
 
-      return func.apply(null, FIN_ARGS);
-    }; // === return
+  /* function length_specs() { */
+  /*   should_eq(length,        [[1]], 1); */
+  /*   should_eq(length,        [function () {}], 0); */
+  /*   should_eq(length,        [function (a) { return a;}], 1); */
+  /*   should_eq(length,        [{length: 3}], 3); */
+  /*   should_eq(length, [3],  new Error('Invalid value for length: 3')); */
+  /* } */
 
-  } // === function to_slot
+  /* string to_key(str) { */
+  /*   return reduce(str, be(is_string), be(not(is_empty)), _.trim); */
+  /* } */
 
-  function replace(pattern, new_value) {
-    if (length(arguments) === 3)
-      return arguments[2].replace(arguments[0], arguments[1]);
+  /* // Removes begining slash, if any. */
+  /* function to_var_name(val, delim) { */
 
-    return function (v) {
-      return v.replace(pattern, new_value);
-    };
-  }
+  /*   if (length(arguments) == 1) */
+  /*     delim = "_"; */
 
-  function length_specs() {
-    spec(length,        [[1]], 1);
-    spec(length,        [function () {}], 0);
-    spec(length,        [function (a) { return a;}], 1);
-    spec(length,        [{length: 3}], 3);
-    spec(length, [3],  new Error('Invalid value for length: 3'));
-  }
+  /*   return val */
+  /*   .replace(/^[\/]+/, "") */
+  /*   .replace(/[^a-zA-Z-0-9\_\-]+/g, delim); */
+  /* } */
 
-  string to_key(str) {
-    return reduce(str, be(is_string), be(not(is_empty)), _.trim);
-  }
+  /* function length(raw_v) { */
+  /*   if (raw_v === null || raw_v === undefined || !_.isFinite(raw_v.length)) */
+  /*     throw new Error("Invalid value for length: " + to_string(raw_v)); */
+  /*   return raw_v.length; */
+  /* } */
 
-  // Removes begining slash, if any.
-  function to_var_name(val, delim) {
+  /* function length_of(num) { */
+  /*   return function (v) { */
+  /*     if (!is_something(v) && has_property_of('length', 'number')(v)) */
+  /*       throw new Error('invalid value for length_of: ' + to_string(num)); */
+  /*     return v.length === num; */
+  /*   }; */
+  /* } */
 
-    if (length(arguments) == 1)
-      delim = "_";
+  /* function is_length_zero(v) { */
+  /*   return length(v) === 0; */
+  /* } */
 
-    return val
-    .replace(/^[\/]+/, "")
-    .replace(/[^a-zA-Z-0-9\_\-]+/g, delim);
-  }
+  /* function all_funcs(arr) { */
+  /*   var l = arr.length; */
+  /*   return _.isFinite(l) && l > 0 && _.all(arr, is_function); */
+  /* } */
 
-  function length(raw_v) {
-    if (raw_v === null || raw_v === undefined || !_.isFinite(raw_v.length))
-      throw new Error("Invalid value for length: " + to_string(raw_v));
-    return raw_v.length;
-  }
-
-  function length_of(num) {
-    return function (v) {
-      if (!is_something(v) && has_property_of('length', 'number')(v))
-        throw new Error('invalid value for length_of: ' + to_string(num));
-      return v.length === num;
-    };
-  }
-
-  function is_length_zero(v) {
-    return length(v) === 0;
-  }
-
-  function all_funcs(arr) {
-    var l = arr.length;
-    return _.isFinite(l) && l > 0 && _.all(arr, is_function);
-  }
-
-
-  function length_gt(num) {
-    return function (v) { return v.length > num;};
-  }
-
-  function be_specs() {
-    spec(be, [is_num, 1],    1);
-    spec(be, [is_num, '1'],  /"1" should be: is_num/);
-    spec(be, [is_string, 2], /2 should be: is_string/);
-  }
-
-  function be(func, val) {
-
-    switch(length(arguments)) {
-      case 2:
-        if (!func(val))
-          throw new Error(to_string(val) + ' should be: ' + to_string(func));
-        return val;
-
-      case 1:
-        be(is_function, func);
-        return function (v) {
-          return be(func, v);
-        };
-    }
-
-    throw new Error("Invalid arguments.");
-  }
-
+  /* function length_gt(num) { */
+  /*   return function (v) { return v.length > num;}; */
+  /* } */
 
 } // === module DA_STANDARD.COMMON
 
