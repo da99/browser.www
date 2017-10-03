@@ -63,10 +63,43 @@ module DA_STANDARD.DOM {
       this.origin.classList.remove(target);
       return this;
     }
+
+    public Array<external> attrs() {
+      return reduce( dom.attributes, function (kv, o) {
+          kv[o.name] = o.value;
+          return kv;
+          }, {}
+          );
+    }
+
+    // Returns id.
+    // Sets id of element if no id is set.
+    //
+    // .dom_id(raw_or_jquery)
+    // .dom_id('prefix', raw_or_jquer)
+    public string function dom_id() {
+      var args   = _.toArray(arguments);
+      var o      = _.find(args, _.negate(_.isString));
+      var prefix = _.find(args, _.isString);
+      var old    = o.attr('id');
+
+      if (old && !is_empty(old))
+        return old;
+
+      var str = new_id(prefix || 'default_id_');
+      o.attr('id', str);
+      return str;
+    } // === id
+
   } // === class Element
 
   public NodeList query(string q) {
     return Document.querySelectorAll(q);
+  }
+
+  void Element_attrs_specs() {
+    spec(dom_attrs, [$('<div id="000" img=".png"></div>')[0]], {id: "000", img: ".png"});
+    spec(dom_attrs, [$('<div class="is_happy"></div>')[0]], {"class": 'is_happy'});
   }
 
 } // === DA_STANDARD.DOM
