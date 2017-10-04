@@ -21,7 +21,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
 
   "run "*)
     reset
-    local +x FILES="$@"
+    local +x FILE="$@"
     local +x SPECS="tmp/specs.jspp"
 
     cd "$THIS_DIR"
@@ -32,20 +32,17 @@ case "$(echo $ACTION $@ | xargs echo)" in
     local +x TOP="import System;";
     local +x BOTTOM="";
 
-    for FILE in ${=FILES} ; do
-      local +x LIB_NAME="$(basename "$FILE" .jspp)"
+    for LIB_FILE in $(echo lib/*.jspp) ; do
+      local +x LIB_NAME="$(basename "$LIB_FILE" .jspp)"
       local +x FULL_NAME="DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]')"
-      case "$LIB_NAME" in
-        DOM|browser) : ;;
-        *)
-          TOP+="\nimport $FULL_NAME;"
-          for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$FILE"); do
-            BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
-            BOTTOM+="\n${FULL_NAME}.${func};"
-            BOTTOM+="\nConsole.log(\"\");"
-          done
-          ;;
-      esac
+      if [[ "$LIB_NAME" == "$FILE" ]]; then
+        TOP+="\nimport $FULL_NAME;"
+        for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$LIB_FILE"); do
+          BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
+          BOTTOM+="\n${FULL_NAME}.${func};"
+          BOTTOM+="\nConsole.log(\"\");"
+        done
+      fi
     done
 
     echo "$TOP" >> $SPECS
