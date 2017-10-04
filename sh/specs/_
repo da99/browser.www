@@ -47,7 +47,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
 
     echo "$TOP" >> $SPECS
     echo "$BOTTOM" >> $SPECS
-    my_jspp __ lib/common.jspp lib/string.jspp lib/specs.jspp "$SPECS" -o tmp/specs.js
+    my_jspp __ lib/${FILE}.jspp lib/common.jspp lib/string.jspp lib/specs.jspp "$SPECS" -o tmp/specs.js
 
     sh_color ORANGE "=== {{Running}}..."
     node tmp/specs.js
