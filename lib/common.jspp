@@ -2,6 +2,7 @@
 external NaN, TypeError, Error, process, require, window;
 
 /* process.stdout.write("."); */
+import DA_STANDARD.STRING;
 import DA_STANDARD.SPECS;
 import System.Console;
 import System;
@@ -55,8 +56,13 @@ module DA_STANDARD.COMMON
     return typeof(v) == "object" && v.constructor === a.constructor;
   }
 
+  function is_function_specs() {
+    should_eq(true,  is_function(function () {}));
+    should_eq(false, is_function(1));
+  }
+
   bool is_function(v) {
-    return typeof(v) === "function";
+    return typeof v === 'function';
   }
 
   bool is_regexp(val) {
@@ -245,255 +251,17 @@ module DA_STANDARD.COMMON
     return is_something(v) && v.constructor === arguments.constructor;
   }
 
+  function own_property_specs() {
+    should_eq(3, own_property('num', {num: 3}));
+    should_eq(undefined, own_property('num', {n:4}));
+  }
 
-  /* function key_to_bool_specs() { */
-  /*   should_eq(key_to_bool, ['time', {time: 'morning'}], true); // it 'returns true if key is "truthy"' */
-  /*   should_eq(key_to_bool, ['!time', {time: false}], true); // it 'returns true if: !key , key is !truthy' */
-  /*   should_eq(key_to_bool, ['!first.second.third', {first: {second: { third: true}}}], true); // it 'handles nested keys' */
-  /*   should_eq(key_to_bool, ['!!!first', {first: false}], true); // it 'handles multiple exclamation marks' */
-  /*   should_eq(key_to_bool, ['first', {}], undefined); // it 'returns undefined if one non-nested key is specified, but not found' */
-  /*   should_eq(key_to_bool, ['is_factor', {is_factor: true}], true); */
-  /*   should_eq(key_to_bool, ['!is_factor', {is_factor: false}], true); */
-  /*   should_eq(key_to_bool, ['is_factor', {is_ruby: false}], undefined); */
-  /*   should_eq(key_to_bool, ['is_happy', {is_happy: true}], true); */
-  /*   should_eq(key_to_bool, ['!is_happy', {is_happy: true}], false); */
-  /*   should_eq(key_to_bool, ['is_happy',  {is_happy: false}], false); */
-  /*   should_eq(key_to_bool, ['!is_happy', {is_happy: false}], true); */
-  /*   should_eq(key_to_bool, [['is_factor'], {}], new Error("[\"is_factor\"] should be: is_string (function)")); */
-  /* } */
-
-  /* function key_to_bool(raw_key, data) { */
-
-  /*   var FRONT_BANGS = /^\!+/; */
-
-  /*   var key = reduce( */
-  /*     raw_key, */
-  /*     be(is_string), */
-  /*     _.trim, */
-  /*     be(not(is_empty)) */
-  /*   ); */
-
-  /*   var bang_match = key.match(FRONT_BANGS); */
-  /*   var dots       = ( bang_match ? key.replace(bang_match[0], '') : key ).split('.'); */
-  /*   var keys       = _.map( dots, _.trim ); */
-
-  /*   var current = data; */
-  /*   var ans  = false; */
-
-  /*   _.find(keys, function (key) { */
-  /*     if (_.has(current, key)) { */
-  /*       current = data[key]; */
-  /*       ans = !!current; */
-  /*     } else { */
-  /*       ans = undefined; */
-  /*     } */
-
-  /*     return !ans; */
-  /*   }); */
-
-  /*   if (ans === undefined) */
-  /*     return ans; */
-
-  /*   if (bang_match) { */
-  /*     _.times(bang_match[0].length, function () { */
-  /*       ans = !ans; */
-  /*     }); */
-  /*   } */
-
-  /*   return ans; */
-  /* } // === func */
-
-  /* bool is_function(v) { */
-  /*   return typeof v === 'function'; */
-  /* } */
-
-  /* function set_function_string_name(f, args) { */
-  /*   if (f.to_string_name) */
-  /*     throw new Error('.to_string_name alread set: ' + to_string(f.to_string_name)); */
-  /*   f.to_string_name = function_sig(f, args); */
-  /*   return f; */
-  /* } */
-
-  /* string function_sig(f, args) { */
-  /*   return function_to_name(f) + '(' + _.map(args, to_string).join(',')  + ')'; */
-  /* } */
-
-  /* function function_to_name_specs() { */
-  /*   should_eq(function_to_name, ["function my_name() {}"], "my_name"); */
-  /* } */
-
-  /* function function_to_name(f) { */
-  /*   var WHITESPACE = /\s+/g; */
-  /*   return f.to_string_name || f.toString().split('(')[0].split(WHITESPACE)[1] || f.toString(); */
-  /* } */
-
-  /* function to_function_string(f, args) { */
-  /*   return function_to_name(f) + '(' + _.map(args, to_string).join(', ') + ')'; */
-  /* } */
-
-  /* bool all(_funcs) { */
-  /*   var _and = and.apply(null, arguments); */
-  /*   return function (arr) { */
-  /*     for(var i = 0; i < length(arr); i++){ */
-  /*       if (!_and(arr[i])) */
-  /*         return false; */
-  /*     } */
-  /*     return true; */
-  /*   }; */
-  /* } */
-
-  /* function own_property_specs() { */
-  /*   should_eq(3, function own_property_returns_own_property() { */
-  /*     return own_property('num')({num: 3}); */
-  /*   }); */
-  /*   should_eq(own_property('num'), [{n:4}], new Error('Key not found: "num" in {"n":4}')); */
-  /* } */
-
-  /* function own_property(name) { */
-
-  /*   return function _own_property_(o) { */
-  /*     if (!o.hasOwnProperty(name)) */
-  /*       throw new Error('Key not found: ' + to_string(name) + ' in ' + to_string(o)); */
-  /*     return o[name]; */
-  /*   }; */
-  /* } // === func own_property */
-
-  /* function msg_match_specs() { */
-  /*   should_eq(msg_match, [1,1], true); */
-  /*   should_eq(msg_match, ["a", "a"], true); */
-  /*   should_eq(msg_match, [[1],[1]], true); */
-  /*   should_eq(msg_match, [[1,[2]],[1,[2]]], true); */
-  /*   should_eq(msg_match, [{a:"b"}, {a:"b",c:"d"}], true); */
-  /*   should_eq(msg_match, [{a:is_string}, {a:"b"}], true); */
-  /*   should_eq(msg_match, [{}, {a:"b"}], false); */
-  /*   should_eq(msg_match, [{}, {}], true); */
-  /*   should_eq(msg_match, [[], []], true); */
-  /* } */
-
-  /* bool msg_match(pattern, msg) { */
-
-  /*   if (_.isEqual(pattern, msg)) */
-  /*     return true; */
-
-  /*   if (is_plain_object(pattern) && is_plain_object(msg)) { */
-  /*     if (is_empty(pattern) !== is_empty(msg)) */
-  /*       return false; */
-
-  /*     return !_.find(_.keys(pattern), function (key) { */
-  /*       var target = pattern[key]; */
-  /*       if (msg[key] === target) */
-  /*         return !true; */
-  /*       if (is_function(target)) */
-  /*         return !be(is_boolean, target(msg[key])); */
-  /*       return !false; */
-  /*     }); */
-  /*   } */
-
-  /*   return false; */
-  /* } */
-
-  /* function copy_value_specs() { */
-  /* should_eq({a:{b:"c"}, b:true}, function () { // Does not alter orig. */
-  /*   var orig = {a:{b:"c"}, b:true}; */
-  /*   var copy = copy_value(orig); */
-  /*   copy.a.b = "1"; */
-  /*   return orig; */
-  /* }); */
-
-  /* should_eq(copy_value, [[1, copy_value], is_function], [1, copy_value]); */
-  /* } */
-
-  /* function copy_value(v) { */
-  /*   var allow_these = []; */
-
-  /*   if (length(arguments) < 2) { */
-  /*     arguments_are(arguments, is_something); */
-  /*   } else { */
-  /*     allow_these = _.toArray(arguments).slice(1); */
-  /*   } */
-
-  /*   var type = typeof v; */
-  /*   if (type === 'string' || type === 'number' || is_boolean(v)) */
-  /*     return v; */
-
-  /*   if (is_array(v)) */
-  /*     return _.map(v, function (new_v) { return copy_value.apply(null, [new_v].concat(allow_these)); }); */
-
-  /*   if (is_plain_object(v)) */
-  /*     return reduce_eachs({}, v, function (acc, kx, x) { */
-  /*       acc[kx] = copy_value.apply(null, [x].concat(allow_these)); */
-  /*       return acc; */
-  /*     }); */
-
-  /*   var return_val = _.find(allow_these, function (f) { return f(v); }); */
-  /*   if (return_val) */
-  /*     return v; */
-
-  /*   return v; */
-  /*   // throw new Error('Value can\'t be copied: ' + to_string(v)); */
-  /* } */
-
-  /* function has_length_specs() { */
-  /*   should_eq(true, function has_length_returns_function() { */
-  /*     return is_function(has_length(1)); */
-  /*   }); */
-
-  /*   should_eq(true, function has_length_returns_function_comparing_length() { */
-  /*     return has_length(1)([1]); */
-  /*   }); */
-
-  /*   should_eq(true, function has_length_returns_function_comparing_length_of_function() { */
-  /*     return has_length(2)(function (a,b) {}); */
-  /*   }); */
-
-  /*   should_eq( */
-  /*     function () { // returns function that returns false on length mismatch */
-  /*       return has_length(3)([1,2]); */
-  /*     }, */
-  /*     [], */
-  /*     new Error("[1, 2].length !== 3") */
-  /*   ); */
-  /* } */
-
-  /* function has_length(num) { */
-  /*   return function _has_length_(val) { */
-  /*     arguments_are(arguments, is_something); */
-  /*     if (val.length === num) */
-  /*       return true; */
-  /*     throw new Error(to_string(val) + '.length !== ' + to_string(num)); */
-  /*   }; */
-  /* } */
-
-  /* function is_specs() { */
-  /*   should_eq(true,  function () { return is(5)(5); }); */
-  /*   should_eq(false, function () { return is("a")("b"); }); */
-  /* } */
-
-  /* function is(target) { */
-  /*   return function (val) { return val === target; }; */
-  /* } */
-
-  /* function keys_or_indexes(v) { */
-  /*   if (is_plain_object(v)) */
-  /*     return _.keys(v); */
-
-  /*   var a = []; */
-  /*   for(var i = 0; i < v.length; i++) { */
-  /*     a[i] = i; */
-  /*   } */
-  /*   return a; */
-  /* } */
-
-  /* function to_value_specs() { */
-  /*   should_eq('"4"', function to_value_returns_a_value() { */
-  /*     return to_value(4, to_string, to_string); */
-  /*   }); */
-
-  /*   should_eq(5, function to_value_returns_first_value_if_no_funcs() { */
-  /*     return to_value(5); */
-  /*   }); */
-  /* } */
-
+  function own_property(string raw_name, v) {
+    string name = trim(raw_name);
+    if (!v.hasOwnProperty(name))
+      return undefined;
+    return v[name];
+  } // === func own_property
 
 
   function return_arguments(...args) { return args; }
@@ -516,35 +284,6 @@ module DA_STANDARD.COMMON
     return arr;
   } // === func
 
-  /* function to_slot(func, _args) { */
-
-  /*   var ARGS = to_array(arguments).slice(1); */
-
-  /*   return function _to_slot_() { */
-
-  /*     var MIDDLE_ARGS = to_array(arguments); */
-  /*     var FIN_ARGS = reduce_eachs([], ARGS, function (array, _i, x) { */
-  /*       if (x !== '{{_}}') { */
-  /*         array.push(x); */
-  /*         return array; */
-  /*       } */
-
-  /*       if (is_empty(MIDDLE_ARGS)) */
-  /*         throw new Error("Not enough arguments for: " + to_string(func) + " args: " + length(MIDDLE_ARGS) + " != " + length(ARGS)); */
-
-  /*       array.push(MIDDLE_ARGS.shift()); */
-
-  /*       return array; */
-  /*     }); */
-
-  /*     if (!is_empty(MIDDLE_ARGS)) */
-  /*       throw new Error("Extra args for : " + to_string(func) + " extra: " + length(MIDDLE_ARGS)); */
-
-  /*     return func.apply(null, FIN_ARGS); */
-  /*   }; // === return */
-
-  /* } // === function to_slot */
-
   // Removes begining slash, if any.
   string to_var_name(string val) {
     return to_var_name(val, "_");
@@ -554,10 +293,14 @@ module DA_STANDARD.COMMON
     return val.replace(/^[\/]+/, "").replace(/[^a-zA-Z-0-9\_\-]+/g, delim);
   }
 
-  bool do_it(int num, func) {
-    for (var i = 0; i < num; i++) {
-      func();
-    }
+  function repeat_specs() {
+    should_eq(5, int () { int i = 1; repeat(4, function () { i = i+1; }); });
+    should_eq(4, int () { int i = 0; repeat(4, void () { i = i+1; }); });
+    should_eq(3, int () { int i = -1; repeat(4, int () { i = i+1; return i; }); });
+  }
+
+  bool repeat(int num, func) {
+    for (var i = 0; i < num; i++) { func(); }
     return true;
   }
 
