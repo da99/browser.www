@@ -136,6 +136,9 @@ module DA_STANDARD.COMMON
     should_eq(false, bool () { return is_empty("a"); });
     should_eq(true,  bool () { return is_empty(return_arguments()); });
     should_eq(false, bool () { return is_empty(return_arguments(1,2,3)); });
+    should_eq(true,  bool () { return is_empty(""); });
+    should_eq(false, bool () { return is_empty("a"); });
+    should_eq(false, bool () { return is_empty("  "); });
   }
 
   bool is_empty(string str) {

@@ -1,5 +1,7 @@
 
 external document;
+import DA_STANDARD.STRING;
+import DA_STANDARD.COMMON;
 
 module DA_STANDARD.DOM {
 
@@ -7,6 +9,20 @@ module DA_STANDARD.DOM {
   /*   spec(dom_attrs, [$('<div id="000" img=".png"></div>')[0]], {id: "000", img: ".png"}); */
   /*   spec(dom_attrs, [$('<div class="is_happy"></div>')[0]], {"class": 'is_happy'}); */
   /* } */
+  class ID_STATE {
+
+    public static int last_id = 0;
+
+    public static int new_id() {
+      this.last_id = this.last_id + 1;
+      return this.last_id;
+    }
+
+    public static string new_id(string prefix) {
+      return trim(prefix) + (this.new_id().toString());
+    }
+
+  }
 
   class Document {
     public static Element querySelector(string s) {
@@ -69,12 +85,23 @@ module DA_STANDARD.DOM {
       return this;
     }
 
-    public Array<external> attrs() {
-      return reduce( dom.attributes, function (kv, o) {
-          kv[o.name] = o.value;
-          return kv;
-          }, {}
-          );
+    public bool has_attr(string raw_name) {
+      string val = attr(trim(raw_name));
+      if (is_nothing(val) || is_empty(val))
+        return false;
+      return true;
+    }
+
+    public string attr(string raw_name) {
+      string name = trim(raw_name);
+      return trim( this.origin.getAttribute(name) || "" );
+    }
+
+    public Element attr(string raw_name, string raw_val) {
+      string name = trim(raw_name);
+      string val  = trim(raw_val);
+      this.origin.setAttribute(name, val);
+      return this;
     }
 
     // Returns id.
@@ -95,7 +122,7 @@ module DA_STANDARD.DOM {
       if (!is_empty(old))
         return old;
 
-      var str = new_id(prefix);
+      var str = ID_STATE.new_id(prefix);
       this.attr('id', str);
       return str;
     } // === id

@@ -6,16 +6,6 @@ import System.Console;
 module DA_STANDARD.STRING
 {
 
-  void length_specs() {
-    should_eq(2, int () { return length("  ");   } );
-    should_eq(1, int () { return length("a");    } );
-    should_eq(5, int () { return length(" abc ");});
-  }
-
-  int length(string raw_v) {
-    return raw_v.length;
-  }
-
   void is_whitespace_specs() {
     should_eq(true, bool () { return is_whitespace("   "); });
     should_eq(false,bool () { return is_whitespace("");    });
@@ -36,18 +26,8 @@ module DA_STANDARD.STRING
 
   bool is_blank(string v) {
     System.RegExp WHITE_SPACE_REGEX = /^\s+|\s+$/g;
-    return length( v.replace(WHITE_SPACE_REGEX, '') ) < 1;
+    return v.replace(WHITE_SPACE_REGEX, '').length < 1;
   }
-
-  void is_empty_specs() {
-    should_eq(true,  bool () { return is_empty(""); });
-    should_eq(false, bool () { return is_empty("a"); });
-    should_eq(false, bool () { return is_empty("  "); });
-  }
-
-  bool is_empty(string v) {
-    return v.length === 0;
-  } // === func
 
   function trim_specs() {
     should_eq("a", string () { return trim(" a    "); });
