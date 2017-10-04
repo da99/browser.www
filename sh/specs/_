@@ -55,6 +55,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
     ;;
 
   run)
+    reset
     local +x FILES="$(find lib -maxdepth 1 -type f -name '*.jspp')"
     local +x SPECS="tmp/specs.jspp"
 

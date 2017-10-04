@@ -81,6 +81,21 @@ module DA_STANDARD.COMMON
     return v === undefined || typeof(v) === "undefined";
   }
 
+  function is_enumerable_specs() {
+    should_eq(true,  bool () { return is_enumerable(["a"]); });
+    should_eq(true,  bool () { return is_enumerable({"a": "b"}); });
+    should_eq(false, bool () { return is_enumerable("a"); });
+  }
+
+  function is_enumerable(v) {
+    return is_string(v) ||
+      is_array(v)         ||
+      is_plain_object(v)  ||
+      is_arguments(v) ||
+      (is_something(v) && is_finite(v.length));
+  }
+
+
   function is_error_specs() {
     should_eq(true,  bool () { return is_error(new Error('anything')); });
     should_eq(false, bool () { return is_error('anything'); });
@@ -227,33 +242,6 @@ module DA_STANDARD.COMMON
     return is_something(v) && v.constructor === arguments.constructor;
   }
 
-  /* function to_default_specs() { */
-  /*   should_eq(to_default, [1,undefined], 1); */
-  /*   should_eq(to_default, [2,null], 2); */
-  /*   should_eq(to_default, [3,[]], []); */
-  /* } */
-
-
-  /* function to_default(valid) { */
-
-  /*   if (length(arguments) === 2) { */
-  /*     var v = arguments[1]; */
-  /*     if (v === null || v === undefined) */
-  /*       return valid; */
-  /*     return v; */
-  /*   } */
-
-  /*   return function (v) { return to_default(valid, v); }; */
-  /* } */
-
-  /* function has_property_of(name, type) { */
-
-  /*   var f = function has_property_of(o) { */
-  /*     return typeof o[name] === type; */
-  /*   }; */
-
-  /*   return set_function_string_name(f, arguments); */
-  /* } */
 
   /* function key_to_bool_specs() { */
   /*   should_eq(key_to_bool, ['time', {time: 'morning'}], true); // it 'returns true if key is "truthy"' */
@@ -503,17 +491,6 @@ module DA_STANDARD.COMMON
   /*   }); */
   /* } */
 
-  /* function to_value(val, _funcs) { */
-  /*   be(is_something, val); */
-  /*   be(not(is_empty), arguments); */
-
-  /*   var i = 1, l = arguments.length; */
-  /*   while (i < l) { */
-  /*     val = arguments[i](val); */
-  /*     i = i + 1; */
-  /*   } */
-  /*   return val; */
-  /* } */
 
 
   function return_arguments(...args) { return args; }
@@ -565,64 +542,21 @@ module DA_STANDARD.COMMON
 
   /* } // === function to_slot */
 
-  /* function replace(pattern, new_value) { */
-  /*   if (length(arguments) === 3) */
-  /*     return arguments[2].replace(arguments[0], arguments[1]); */
+  // Removes begining slash, if any.
+  string to_var_name(string val) {
+    return to_var_name(val, "_");
+  }
 
-  /*   return function (v) { */
-  /*     return v.replace(pattern, new_value); */
-  /*   }; */
-  /* } */
+  string to_var_name(string val, string delim) {
+    return val.replace(/^[\/]+/, "").replace(/[^a-zA-Z-0-9\_\-]+/g, delim);
+  }
 
-  /* function length_specs() { */
-  /*   should_eq(length,        [[1]], 1); */
-  /*   should_eq(length,        [function () {}], 0); */
-  /*   should_eq(length,        [function (a) { return a;}], 1); */
-  /*   should_eq(length,        [{length: 3}], 3); */
-  /*   should_eq(length, [3],  new Error('Invalid value for length: 3')); */
-  /* } */
-
-  /* string to_key(str) { */
-  /*   return reduce(str, be(is_string), be(not(is_empty)), _.trim); */
-  /* } */
-
-  /* // Removes begining slash, if any. */
-  /* function to_var_name(val, delim) { */
-
-  /*   if (length(arguments) == 1) */
-  /*     delim = "_"; */
-
-  /*   return val */
-  /*   .replace(/^[\/]+/, "") */
-  /*   .replace(/[^a-zA-Z-0-9\_\-]+/g, delim); */
-  /* } */
-
-  /* function length(raw_v) { */
-  /*   if (raw_v === null || raw_v === undefined || !_.isFinite(raw_v.length)) */
-  /*     throw new Error("Invalid value for length: " + to_string(raw_v)); */
-  /*   return raw_v.length; */
-  /* } */
-
-  /* function length_of(num) { */
-  /*   return function (v) { */
-  /*     if (!is_something(v) && has_property_of('length', 'number')(v)) */
-  /*       throw new Error('invalid value for length_of: ' + to_string(num)); */
-  /*     return v.length === num; */
-  /*   }; */
-  /* } */
-
-  /* function is_length_zero(v) { */
-  /*   return length(v) === 0; */
-  /* } */
-
-  /* function all_funcs(arr) { */
-  /*   var l = arr.length; */
-  /*   return _.isFinite(l) && l > 0 && _.all(arr, is_function); */
-  /* } */
-
-  /* function length_gt(num) { */
-  /*   return function (v) { return v.length > num;}; */
-  /* } */
+  bool do_it(int num, func) {
+    for (var i = 0; i < num; i++) {
+      func();
+    }
+    return true;
+  }
 
 } // === module DA_STANDARD.COMMON
 
