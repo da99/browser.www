@@ -1,7 +1,7 @@
 
 import System;
 import DA_STANDARD.SPECS;
-
+import System.Console;
 
 module DA_STANDARD.STRING
 {
@@ -49,48 +49,38 @@ module DA_STANDARD.STRING
     return v.length === 0;
   } // === func
 
+  function trim_specs() {
+    should_eq("a", string () { return trim(" a    "); });
+    should_eq(['a', 'b', 'c'], string[] () { return trim("a;b;c".split(';')); });
+    should_eq(['a', 'b', 'c'], string[] () { return trim("a ; b; ;  c".split(/;/)); });
+    should_eq(['a', 'c'],      string[] () { return trim("a; ;;;c".split(/;/)); });
+    should_eq(['form', 'id'],  string[] () { return trim('form.id'.split('.')); });
+  }
+
+  string trim(string raw) {
+    return raw.replace(/^\s+|\s+$/g, "");
+  }
+
+  string[] trim(string[] raw) {
+    int len        = raw.length;
+    string[] fin   = [];
+    string trimmed = "";
+    for (int i = 0; i < len; i++) {
+      trimmed = trim(raw[i]);
+      if (trimmed.length !== 0)
+        fin.push(trimmed);
+    }
+    return fin;
+  }
+
   function standard_name_specs() {
     should_eq("name name", string () { return standard_name('NAME NAME'); });  // it 'lowercases names'
     should_eq("name",      string () { return standard_name('  name  '); });   // it 'trims string'
     should_eq("n ame",     string () { return standard_name('n   aME');  });   // it 'squeezes whitespace'
   }
 
-  string standard_name(str) {
-    return trim(str).replace(/\s+/g, ' ').toLowerCase();
-  }
-
-  function trim_specs() {
-    should_eq("a", string () { return trim(" a    "); });
-  }
-
-  string trim(string raw) {
-    return raw.replace(/^\s+|\s+$/, "");
-  }
-
-  function split_on_specs() {
-    should_eq(['a', 'b', 'c'], string[] () { return split_on(/;/, "a;b;c"); });
-    should_eq(['a', 'b', 'c'], string[] () { return split_on(/;/, "a;b;c"); });
-    should_eq(['a', 'c'],      string[] () { return split_on(/;/, "a; ;c"); });
-    should_eq(['form', 'id'],  string[] () { return split_on('.', 'form.id'); });
-  }
-
-  string[] split_on(pattern, string raw) {
-    string str = trim(raw);
-    if (is_empty(str))
-      return [];
-
-    string[] fin = [];
-    string[] arr = str.split(pattern);
-    int len      = arr.length;
-    string x     = "";
-
-    for (int i = 0; i < len; i++) {
-       x = trim(arr[i]);
-       if (!is_empty(x))
-         fin.push(x);
-    }
-
-    return arr;
+  string standard_name(string str) {
+    return trim(str.replace(/\s+/g, ' ')).toLowerCase();
   }
 
 } // === module DA_STANDARD

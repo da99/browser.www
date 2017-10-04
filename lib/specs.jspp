@@ -6,10 +6,25 @@ import DA_STANDARD.COMMON;
 module DA_STANDARD.SPECS
 {
 
+  bool arrays_are_equal(a1, a2) {
+    int len_1 = a1.length;
+    int len_2 = a2.length;
+    if (len_1 !== len_2)
+      return false;
+    for (int i = 0 ; i < len_1 ; i++) {
+      if (a1[i] !== a2[i])
+        return false;
+    }
+    return true;
+  }
+
   void should_eq(expected, func) {
     var actual = func();
 
-    if (actual != expected) {
+    if (
+        (actual != expected) &&
+        !(is_array(expected) && is_array(actual) && arrays_are_equal(expected, actual))
+       ) {
       throw new Error(to_string(func) + " EXPECTED: " + to_string(expected) + " ACTUAL: " + to_string(actual));
     }
 
