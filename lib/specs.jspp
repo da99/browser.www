@@ -18,17 +18,22 @@ module DA_STANDARD.SPECS
     return true;
   }
 
-  void should_eq(expected, func) {
-    var actual = func();
+  void should_eq(expected, func_or_other) {
+    var actual = undefined;
+    if (is_function(func_or_other)) {
+      actual = func_or_other();
+    } else {
+      actual = func_or_other;
+    }
 
     if (
         (actual != expected) &&
         !(is_array(expected) && is_array(actual) && arrays_are_equal(expected, actual))
        ) {
-      throw new Error(to_string(func) + " EXPECTED: " + to_string(expected) + " ACTUAL: " + to_string(actual));
+      throw new Error(to_string(func_or_other) + " EXPECTED: " + to_string(expected) + " ACTUAL: " + to_string(actual));
     }
 
-    Console.log("Pass: " + to_string(expected) + " == " + to_string(func) );
+    Console.log("Pass: " + to_string(expected) + " == " + to_string(func_or_other) );
   }
 
   void should_eq(expected, func, ...args) {

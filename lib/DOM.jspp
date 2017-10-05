@@ -14,12 +14,12 @@ module DA_STANDARD.DOM {
     public static int last_id = 0;
 
     public static int new_id() {
-      this.last_id = this.last_id + 1;
-      return this.last_id;
+      ID_STATE.last_id = ID_STATE.last_id + 1;
+      return ID_STATE.last_id;
     }
 
     public static string new_id(string prefix) {
-      return trim(prefix) + (this.new_id().toString());
+      return trim(prefix) + (ID_STATE.new_id().toString());
     }
 
   }

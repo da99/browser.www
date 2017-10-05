@@ -1,11 +1,10 @@
 
-external NaN, TypeError, Error, process, require, window;
+external NaN, TypeError, Error, process, require, window, arguments, Object, RegExp;
 
 /* process.stdout.write("."); */
 import DA_STANDARD.STRING;
 import DA_STANDARD.SPECS;
 import System.Console;
-import System;
 
 module DA_STANDARD.COMMON
 {
@@ -90,14 +89,13 @@ module DA_STANDARD.COMMON
   function is_enumerable_specs() {
     should_eq(true,  bool () { return is_enumerable(["a"]); });
     should_eq(true,  bool () { return is_enumerable({"a": "b"}); });
-    should_eq(false, bool () { return is_enumerable("a"); });
+    should_eq(true, bool () { return is_enumerable("a"); });
   }
 
   function is_enumerable(v) {
     return is_string(v) ||
       is_array(v)         ||
       is_plain_object(v)  ||
-      is_arguments(v) ||
       (is_something(v) && is_finite(v.length));
   }
 
@@ -158,9 +156,6 @@ module DA_STANDARD.COMMON
     if (is_plain_object(v))
       return keys(v).length === 0;
 
-    if (is_arguments(v))
-      return v.length === 0;
-
     throw new Error("Invalid value for is_empty: " + to_string(v));
   } // === func
 
@@ -173,10 +168,13 @@ module DA_STANDARD.COMMON
   }
 
   function is_something(v) {
-
     if (arguments.length !== 1)
       throw new Error("arguments.length !== 1: " + to_string(v));
     return v !== null && v !== undefined;
+  }
+
+  bool is_arguments(v) {
+    return Object.prototype.toString.call( v ) === '[object Arguments]';
   }
 
   string inspect(arg) {
@@ -191,21 +189,25 @@ module DA_STANDARD.COMMON
     should_eq('{"a":"b","c":"d"}', string () { return to_string({a:'b', c:'d'}); });
   }
 
-  string to_string(string str) {
-    return '"' + str + '"';
-  }
-
-  string to_string(bool b) {
-    if (b === false)     return 'false';
-    if (b === true)      return 'true';
-  }
-
   string to_string(arg) {
-    if (arg === null)      return 'null';
-    if (arg === undefined) return 'undefined';
+    if (arg === null)
+      return 'null';
+
+    if (arg === undefined)
+      return 'undefined';
 
     if (is_function(arg))
       return arg.toString().replace("function (){return(", "").replace(/\)?;\}$/, '');
+
+    if (arg === true)
+      return 'true';
+
+    if (arg === false)
+      return 'false';
+
+    if (is_string(arg)) {
+      return '"' + arg + '"';
+    }
 
     if (is_function(arg))
       return (arg.name) ? arg.name + ' (function)' : arg.toString();
@@ -213,43 +215,34 @@ module DA_STANDARD.COMMON
     if (is_error(arg))
       return '[Error] ' + to_string(arg.message);
 
+    if (typeof arg === "object" ) {
 
-    if (arg === "object" ) {
-      if (is_array(arg)) {
-        string[] fin = ["["];
+      if (is_array(arg) || is_arguments(arg)) {
+        string[] fin = [];
         foreach ( var x in arg ) {
           fin.push(to_string(x));
         }
-        fin.push("]");
-        return fin.join(", ");
+        string fin_str = fin.join(",");
+
+        if (is_arguments(arg))
+          return "arguments[" + fin_str + "]";
+        else
+          return "[" + fin_str + "]";
       }
 
-      string[] fin = ["{"];
+      string[] fin = [];
       for(var x in arg) {
         if (arg.hasOwnProperty(x)) {
-          fin.push(to_string(arg[x]));
+          fin.push(to_string(x) + ":" + to_string(arg[x]));
         }
       }
-      fin.push("}");
-      return fin.join(", ");
+      string fin_str = "{" + fin.join(",") + "}";
+      return fin_str;
     }
-
-    if ( is_arguments(arg) )
-      return to_string(to_array(arg));
 
     var _inspect = (typeof window == "undefined") ? require('util').inspect : function (v) { return "" + v; };
     return _inspect(arg);
   } // === string to_string
-
-  function is_arguments_specs() {
-    should_eq(true,  bool () { return is_arguments(return_arguments()); });
-    should_eq(false, bool () { return is_arguments([]); });
-    should_eq(false, bool () { return is_arguments({}); });
-  }
-
-  function is_arguments(v) {
-    return is_something(v) && v.constructor === arguments.constructor;
-  }
 
   function own_property_specs() {
     should_eq(3, own_property('num', {num: 3}));
@@ -263,8 +256,7 @@ module DA_STANDARD.COMMON
     return v[name];
   } // === func own_property
 
-
-  function return_arguments(...args) { return args; }
+  function return_arguments(...args) { return arguments; }
   function to_arguments() { return arguments; }
 
   function to_array_specs() {
@@ -294,12 +286,12 @@ module DA_STANDARD.COMMON
   }
 
   function repeat_specs() {
-    should_eq(5, int () { int i = 1; repeat(4, function () { i = i+1; }); });
-    should_eq(4, int () { int i = 0; repeat(4, void () { i = i+1; }); });
-    should_eq(3, int () { int i = -1; repeat(4, int () { i = i+1; return i; }); });
+    should_eq(5, int () { int i = 1; repeat(4, function () { i = i+1; }); return i; });
+    should_eq(4, int () { int i = 0; repeat(4, void () { i = i+1; }); return i; });
+    should_eq(3, int () { int i = -1; repeat(4, int () { i = i+1; }); return i; });
   }
 
-  bool repeat(int num, func) {
+  bool repeat(unsigned short num, func) {
     for (var i = 0; i < num; i++) { func(); }
     return true;
   }
