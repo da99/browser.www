@@ -8,17 +8,17 @@ module DA_STANDARD.BROWSER
 {
 
   function wait_max_specs() {
-    should_eq(5, function stops_on_return_true(fin) {
+    should_eq(5, void stops_on_return_true() {
         int i = 0;
-        wait_max(2, function () {
+        wait_max(2, bool () {
             i = i + 1;
-            if (i === 5) { fin(i); return true; }
+            if (i === 5) { return true; }
             return false;
             });
         });
   } // function wait_max_specs
 
-  void wait_max(int seconds, func) {
+  void wait_max(int seconds, bool() func) {
     var ms       = seconds * 1000;
     var total    = 0;
     var interval = 100;
