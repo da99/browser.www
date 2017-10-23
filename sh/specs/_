@@ -57,11 +57,18 @@ case "$(echo $ACTION $@ | xargs echo)" in
 
   run-server)
     mkdir -p tmp/out tmp/in
-    sh_color ORANGE "=== {{Compiling}} server..."
-    my_crystal __ build specs/browser-specs/server.cr -o tmp/out/da_standard.server
+    local +x IN_FILE="specs/browser-specs/server.cr"
+    local +x OUT_FILE="tmp/out/da_standard.server"
+    if my_fs a-is-younger-than-b "$IN_FILE" "$OUT_FILE" ; then
+      sh_color ORANGE "=== {{Compiling}} server..."
+      my_crystal __ build "$IN_FILE" -o "$OUT_FILE"
+    else
+      sh_color ORANGE "=== Skipping {{compiling}} server."
+    fi
+
     pkill -f tmp/out/da_standard.server || :
     sh_color ORANGE "=== {{Running}} server..."
-    tmp/out/da_standard.server
+    tmp/out/da_standard.server &
     ;;
 
   run)

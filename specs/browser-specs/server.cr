@@ -8,28 +8,9 @@ PORT = 3010
 class Router
 
   include DA_ROUTER
-  HTML = File.read("specs/browser-specs/specs.html")
-  SPECS_JS = File.read("tmp/specs.js")
-
-  def self.fulfill(ctx)
-    route(ctx) do
-      post("/", Router, :slash)
-      get("/specs", Router, :specs_html)
-      get("/specs.js", Router, :specs_js)
-      get("/_csrf", Router, :_csrf)
-      post("/html", Router, :html)
-      post("/404-html", Router, :html_404)
-      post("/string-as-html", Router, :string_as_html)
-      post("/text", Router, :text)
-      # post("/all-specs-pass", Router, :all_specs_pass)
-      post("/repeat", Router, :repeat)
-      post("/json", Router, :json)
-      # post("/client-error-to-stdout", Router, :client_error_to_stdout)
-
-      ctx.response.status_code = 404
-      json(ctx, {msg: "not found: #{ctx.request.method} #{ctx.request.path}"})
-    end
-  end # === def self.fulfill
+  HTML        = File.read("specs/browser-specs/specs.html")
+  SPECS_JS    = File.read("tmp/specs.js")
+  VANILLA_CSS = File.read("specs/browser-specs/css/vanilla.reset.css")
 
   def resp
     ctx.response
@@ -42,6 +23,11 @@ class Router
 
   def write_html(str : String)
     ctx.response.content_type = "text/html"
+    ctx.response << str
+  end # === def write_html
+
+  def write_css(str : String)
+    ctx.response.content_type = "text/css"
     ctx.response << str
   end # === def write_html
 
@@ -64,60 +50,73 @@ class Router
     r << o.to_json
   end
 
-  def get_specs_html
+  get("/") do
     write_html HTML
   end
 
-  def get_specs_js
+  get("/specs.js") do
     write_js SPECS_JS
   end
 
-  def post_slash
+  post("/") do
     json({when: "for now"})
   end
 
-  def get__csrf
+  get("/_csrf") do
     json({_csrf: "some_value"})
   end
 
-  def post_html
+  get("/css/vanilla.reset.css") do
+    write_css VANILLA_CSS
+  end
+
+  post("/html") do
     write_html "<html><body>Some html.</body></html>"
   end
 
-  def post_html_404
+  post("/404-html") do
     resp.status_code = 404
     write_html "<p>Not found: #{ctx.request.path}</p>"
   end
 
-  def post_string_as_html
+  post("/string-as-html") do
     write_html("Some invalid html.")
   end
 
-  def post_text
+  post("/text") do
     write_text("Some plain text.");
   end
 
-  # def post_all_specs_pass
-  #   FS.writeFileSync("tmp/browser.js.results", JSON.stringify(req.body));
-  #   json({ok: true})
-  # end
 
   def request_body
     (ctx.request.body || "").to_s
   end
 
-  def post_repeat
+  post("/repeat") do
     json({ok: true, data: request_body, about: "data received: #{request_body.to_json}" })
   end
 
-  def post_json
+  post("/json") do
     json({msg: "get smart"})
   end
 
-#   def post_client_error_to_stdout
-#     FS.writeFileSync("tmp/catch.browser.js.txt", req.body.message + "\n" + req.body.stack);
-#     json({ok: true})
-#   end
+  # post("/client-error-to-stdout") do
+  #   FS.writeFileSync("tmp/catch.browser.js.txt", req.body.message + "\n" + req.body.stack);
+  #   json({ok: true})
+  # end
+
+  # post("/all-specs-pass") do
+  #   FS.writeFileSync("tmp/browser.js.results", JSON.stringify(req.body));
+  #   json({ok: true})
+  # end
+
+  def self.fulfill(ctx)
+    DA_ROUTER.route!(ctx)
+    ctx.response.status_code = 404
+    json(ctx, {msg: "not found: #{ctx.request.method} #{ctx.request.path}"})
+    route(ctx) do
+    end
+  end # === def self.fulfill
 
 end # === class Router
 
