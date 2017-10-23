@@ -75,6 +75,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
     reset
     local +x FILES="$(find lib -maxdepth 1 -type f -name '*.jspp')"
     local +x SPECS="tmp/specs.jspp"
+    local +x BROWSER_SPECS="tmp/browser.specs.jspp"
 
     cd "$THIS_DIR"
     mkdir -p tmp
@@ -114,10 +115,18 @@ case "$(echo $ACTION $@ | xargs echo)" in
     echo "$TOP" >> $SPECS
     echo "$BOTTOM" >> $SPECS
     echo "\nConsole.log(\"All specs PASSED.\");" >> $SPECS
-    my_jspp __ ${=FILES} "$SPECS" -o tmp/specs.js
 
-    sh_color ORANGE "=== {{Running}}..."
+    echo "$TOP" >> $BROWSER_SPECS
+    echo "$BOTTOM" >> $BROWSER_SPECS
+    echo "\nConsole.log(\"All specs PASSED.\");" >> $BROWSER_SPECS
+    cat "specs/browser-specs/append.js" >> $BROWSER_SPECS
+
+    my_jspp __ ${=FILES} "$SPECS" -o tmp/specs.js
+    my_jspp __ ${=FILES} "$BROWSER_SPECS" -o tmp/browser.specs.js
+
+    sh_color ORANGE "=== {{Running}} on node..."
     node tmp/specs.js
+
     da_standard.jspp specs run-server
     sh_color GREEN "=== {{DONE}} ===";
     ;;
