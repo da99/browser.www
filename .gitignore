@@ -15,3 +15,5 @@
 
 /lib/browser/build/browser.js.body
 /lib/browser/build/browser.js.head
+.shards/
+shard.lock

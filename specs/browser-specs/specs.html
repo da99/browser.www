@@ -1,11 +1,13 @@
 <html>
   <head>
-    <title>Dum Dum Boom Boom</title>
+    <title>da_standard for the browser</title>
   </head>
   <body>
     <div id="Spec_Stage"></div>
-    {{JS_FILES}}
-    <script type="text/javascript" src="/run.specs.js"></script>
+    <script type="text/javascript" src="./specs.js"></script>
     <a href="/specs">All specs</a>
+    <script type="text/javascript">
+      window.setTimeout(function () { window.location.reload(true); }, 5000);
+    </script>
   </body>
 </html>

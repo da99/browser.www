@@ -14,6 +14,7 @@ fi
 
 case "$(echo $ACTION $@ | xargs echo)" in
   watch|"watch "*)
+    export CONTROLLER_PID=$$
     local +x CMD="da_standard.jspp specs run $@"
     ${=CMD} || sh_color RED "=== {{FAILED}}: BOLD{{$?}}"
     process watch "-r sh -r bin -r lib -r specs" $CMD
@@ -54,6 +55,15 @@ case "$(echo $ACTION $@ | xargs echo)" in
     sh_color GREEN "=== {{DONE}} ===";
     ;;
 
+  run-server)
+    mkdir -p tmp/out tmp/in
+    sh_color ORANGE "=== {{Compiling}} server..."
+    my_crystal __ build specs/browser-specs/server.cr -o tmp/out/da_standard.server
+    pkill -f tmp/out/da_standard.server || :
+    sh_color ORANGE "=== {{Running}} server..."
+    tmp/out/da_standard.server
+    ;;
+
   run)
     reset
     local +x FILES="$(find lib -maxdepth 1 -type f -name '*.jspp')"
@@ -65,14 +75,24 @@ case "$(echo $ACTION $@ | xargs echo)" in
     sh_color ORANGE "=== {{Compiling}}..."
     echo "" > $SPECS
 
-    local +x TOP="import System;";
+    local +x TOP="import System; external window;";
     local +x BOTTOM="";
 
     for FILE in ${=FILES}; do
       local +x LIB_NAME="$(basename "$FILE" .jspp)"
       local +x FULL_NAME="DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]')"
       case "$LIB_NAME" in
-        DOM|browser) : ;;
+        DOM|browser)
+          TOP+="\nimport $FULL_NAME;"
+          for func in $(egrep -woh '^\ +[^\ ]+_specs\(\ *\)' "$FILE"); do
+            BOTTOM+="\nif (typeof window !== 'undefined' ) {\n"
+            BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
+            BOTTOM+="\n${FULL_NAME}.${func};"
+            BOTTOM+="\nConsole.log(\"\");"
+            BOTTOM+="\n}\n"
+          done
+          ;;
+
         *)
           TOP+="\nimport $FULL_NAME;"
           for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$FILE"); do
@@ -86,10 +106,12 @@ case "$(echo $ACTION $@ | xargs echo)" in
 
     echo "$TOP" >> $SPECS
     echo "$BOTTOM" >> $SPECS
+    echo "\nConsole.log(\"All specs PASSED.\");" >> $SPECS
     my_jspp __ ${=FILES} "$SPECS" -o tmp/specs.js
 
     sh_color ORANGE "=== {{Running}}..."
     node tmp/specs.js
+    da_standard.jspp specs run-server
     sh_color GREEN "=== {{DONE}} ===";
     ;;
 
