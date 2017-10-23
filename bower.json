@@ -13,8 +13,6 @@
     "/bin",
     "/node_modules",
     "/bower_components",
-    "/lib/node",
-    "/lib/common",
     "/test",
     "/tests",
     "/package.json",

@@ -69,5 +69,5 @@ Specs
 
 ```bash
   da_standard.jspp test-html  # All specs.
-  da_standard.jspp test-html  lib/html/specs/my-dir-of-a-spec
+  da_standard.jspp test-html  src/html/specs/my-dir-of-a-spec
 ```

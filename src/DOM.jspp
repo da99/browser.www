@@ -2,13 +2,17 @@
 external document;
 import DA_STANDARD.STRING;
 import DA_STANDARD.COMMON;
+import DA_STANDARD.SPECS;
 
 module DA_STANDARD.DOM {
 
-  /* void Element_attrs_specs() { */
-  /*   spec(dom_attrs, [$('<div id="000" img=".png"></div>')[0]], {id: "000", img: ".png"}); */
-  /*   spec(dom_attrs, [$('<div class="is_happy"></div>')[0]], {"class": 'is_happy'}); */
-  /* } */
+  void ID_STATE_specs() {
+    should_eq(1, int () { return ID_STATE.new_id(); });
+    should_eq(2, int () { return ID_STATE.new_id(); });
+  }
+
+  // === ID_STATE:
+  // ===   Used to generate unique ids for elements.
   class ID_STATE {
 
     public static int last_id = 0;
@@ -22,7 +26,7 @@ module DA_STANDARD.DOM {
       return trim(prefix) + (ID_STATE.new_id().toString());
     }
 
-  }
+  } // === class ID_STATE
 
   class Document {
     public static Element querySelector(string s) {

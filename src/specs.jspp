@@ -1,10 +1,19 @@
 
-external Error;
+external Error, setTimeout;
 import System.Console;
 import DA_STANDARD.COMMON;
 
 module DA_STANDARD.SPECS
 {
+
+  class SPEC_STATE {
+    public static int count = 0;
+    public static int wait_for(void() f, int interval) {
+      SPEC_STATE.count += 1;
+      setTimeout(void () { SPEC_STATE.count -= 1; f(); }, interval);
+      return SPEC_STATE.count;
+    }
+  }
 
   bool arrays_are_equal(a1, a2) {
     int len_1 = a1.length;

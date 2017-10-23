@@ -23,7 +23,7 @@ server () {
       ;;
 
     index)
-      echo "http://localhost:$(server port)/$(find "$THIS_DIR/lib/browser/specs/" -mindepth 1 -maxdepth 1 -type f -name "specs*html" | xargs -I FILE basename FILE)"
+      echo "http://localhost:$(server port)/$(find "$THIS_DIR/src/browser/specs/" -mindepth 1 -maxdepth 1 -type f -name "specs*html" | xargs -I FILE basename FILE)"
       ;;
 
     restart)
@@ -39,7 +39,7 @@ server () {
         return 0
       fi
 
-      (node lib/browser/specs/server.js $THIS_DIR/lib/browser/specs/specs.html "$@") &
+      (node src/browser/specs/server.js $THIS_DIR/src/browser/specs/specs.html "$@") &
       server_pid="$!"
 
       mkdir -p tmp

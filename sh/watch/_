@@ -5,7 +5,7 @@ source "$THIS_DIR/bin/public/server/_.sh"
 # === {{CMD}} "cmd with args"
 watch () {
   local +x CMD="$@"
-  local +x FILES="$PWD -r lib/ bin/"
+  local +x FILES="$PWD -r src/ bin/"
 
   sh_color BOLD "=== Watching: {{$FILES}} CMD: {{$CMD}}"
   $CMD || :
@@ -42,7 +42,7 @@ watch () {
   done # === while
 
   return 0 # ===================================================================
-  # process watch "-r bin -r lib --exclude /build/" "$@"
+  # process watch "-r bin -r src --exclude /build/" "$@"
 
   local BROWSER_ERROR="tmp/catch.browser.js.txt"
   # for FILE in $(git ls-files --cached --others --exclude-standard | grep --extended-regexp '.js|.html|bin'); do
@@ -65,7 +65,7 @@ watch () {
 
   echo -e "\n=== Watching:"
 
-  inotifywait --quiet --monitor --event close_write $PWD -r lib/ bin/ | while read -r CHANGE; do
+  inotifywait --quiet --monitor --event close_write $PWD -r src/ bin/ | while read -r CHANGE; do
     dir=$(echo "$CHANGE" | cut -d' ' -f 1)
     path="${dir}$(echo "$CHANGE" | cut -d' ' -f 3)"
     file="$(basename $path)"
@@ -82,7 +82,7 @@ watch () {
 
     # === Browser errors:
     if [[ "$path" == "$BROWSER_ERROR" ]]; then
-      cat "$BROWSER_ERROR" | js_setup map-errors-to-files lib/
+      cat "$BROWSER_ERROR" | js_setup map-errors-to-files src/
       continue
     fi
 
@@ -102,19 +102,19 @@ watch () {
 
     echo "$path" > "$TEMP/CHANGE"
 
-    if [[ "$path" == lib/html/specs/**/*.html || "$path" == lib/html/specs/**/*.json ]]; then
-      { $0 test-html lib/html/specs/"$(echo "$path" | cut -d'/' -f2)" && $0 test-html; } || :
+    if [[ "$path" == src/html/specs/**/*.html || "$path" == src/html/specs/**/*.json ]]; then
+      { $0 test-html src/html/specs/"$(echo "$path" | cut -d'/' -f2)" && $0 test-html; } || :
       continue
     fi
 
-    if [[ "$path" == lib/browser/specs/*.js ]]; then
+    if [[ "$path" == src/browser/specs/*.js ]]; then
       js_setup jshint "$path" || continue
       if server is-running; then
         server restart
       fi
     fi
 
-    # if [[ "$path" =~ "lib/browser/specs/" ]]; then
+    # if [[ "$path" =~ "src/browser/specs/" ]]; then
     #   { gui_setup reload-browser google-chrome "Dum"; } || :
     #   continue
     # fi

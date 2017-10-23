@@ -1,0 +1,15 @@
+
+import System;
+
+<% modules.each do |mod| %>
+  import DA_STANDARD.<%= mod %>;
+<% end -%>
+
+<% spec_funcs.each do |func_call| %>
+  Console.log("=== <%= func_call %>");
+  DA_STANDARD.<%=func_call%>;
+  Console.log("");
+<% end -%>
+
+Console.log("All specs PASSED.");
+Console.log("JS file compiled at: <%= Time.now.to_s("%I:%M:%S %D") %>");

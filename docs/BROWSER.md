@@ -66,7 +66,7 @@ data-do is the only pre-installed message function:
 ============================
 It is actually named `process_data_dos` inside
 the App object:
-[source code](https://github.com/da99/da_standard.jspp/blob/master/lib/browser/data-do/_.bottom.js).
+[source code](https://github.com/da99/da_standard.jspp/blob/master/src/browser/data-do/_.bottom.js).
 
 You associate DOM elements with the `data-do` attribute:
 

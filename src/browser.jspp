@@ -8,20 +8,18 @@ module DA_STANDARD.BROWSER
 {
 
   function wait_max_specs() {
-    should_eq(5, void stops_on_return_true() {
-        int i = 0;
-        wait_max(2, bool () {
-            i = i + 1;
-            if (i === 5) { return true; }
-            return false;
-            });
-        });
+    int i = 0;
+    wait_max(1, bool () { i = i + 1; if (i === 5) { return true; } return false; });
+    SPEC_STATE.wait_for(
+        void () { should_eq(5, i); },
+        800
+        );
   } // function wait_max_specs
 
   void wait_max(int seconds, bool() func) {
-    var ms       = seconds * 1000;
-    var total    = 0;
-    var interval = 100;
+    int ms       = seconds * 1000;
+    int total    = 0;
+    int interval = 100;
 
     function reloop() {
       total = total + interval;
@@ -32,7 +30,7 @@ module DA_STANDARD.BROWSER
       else
         setTimeout(reloop, interval);
     }
-    setTimeout(reloop, interval);
+    reloop();
   } // === void wait_max
 
 

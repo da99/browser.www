@@ -7,11 +7,10 @@ PORT = 3010
 
 class Router
 
-  @@static_file = HTTP::StaticFileHandler.new("specs/browser-specs", false)
+  @@static_file = HTTP::StaticFileHandler.new("specs/browser", false)
+  @@tmp_file = HTTP::StaticFileHandler.new("tmp", false)
 
   include DA_ROUTER
-  HTML        = File.read("specs/browser-specs/specs.html")
-  SPECS_JS    = File.read("tmp/browser.specs.js")
 
   def resp
     ctx.response
@@ -52,13 +51,16 @@ class Router
   end
 
   get("/") do
-    write_html HTML
+    ctx.request.path = "/index.html"
+    @@static_file.call(ctx)
   end
 
   get("/favicon.ico") { @@static_file.call(ctx) }
   get("/css/:name") { @@static_file.call(ctx) }
 
-  get("/specs.js") { write_js SPECS_JS }
+  get("/browser.specs.js") {
+    @@tmp_file.call(ctx)
+  }
 
   post("/") do
     json({when: "for now"})

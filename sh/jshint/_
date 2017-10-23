@@ -28,7 +28,7 @@ jshint () {
       js_setup jshint "$FAIL" && { reset_fail; } || :
     fi
 
-    files="$(echo lib/$group/*.js)"
+    files="$(echo src/$group/*.js)"
     echo -n "=== Linting $(echo $files | wc -w) files: "
     jshint $files
 

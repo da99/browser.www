@@ -12,12 +12,16 @@ else
   local +x ACTION="$1"; shift
 fi
 
+spec_functions () {
+  grep -Pio '^\ +(\w+)\ +\K(.+_specs)\(\ *\)' "$@"
+}
+
 case "$(echo $ACTION $@ | xargs echo)" in
   watch|"watch "*)
     export CONTROLLER_PID=$$
     local +x CMD="da_standard.jspp specs run $@"
     ${=CMD} || sh_color RED "=== {{FAILED}}: BOLD{{$?}}"
-    process watch "-r sh -r bin -r lib -r specs" $CMD
+    process watch "-r sh -r bin -r src -r specs" $CMD
     ;;
 
   "run "*)
@@ -33,12 +37,12 @@ case "$(echo $ACTION $@ | xargs echo)" in
     local +x TOP="import System;";
     local +x BOTTOM="";
 
-    for LIB_FILE in $(echo lib/*.jspp) ; do
+    for LIB_FILE in $(echo src/*.jspp) ; do
       local +x LIB_NAME="$(basename "$LIB_FILE" .jspp)"
       local +x FULL_NAME="DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]')"
       if [[ "$LIB_NAME" == "$FILE" ]]; then
         TOP+="\nimport $FULL_NAME;"
-        for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$LIB_FILE"); do
+        for func in $(spec_functions "$LIB_FILE"); do
           BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
           BOTTOM+="\n${FULL_NAME}.${func};"
           BOTTOM+="\nConsole.log(\"\");"
@@ -48,7 +52,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
 
     echo "$TOP" >> $SPECS
     echo "$BOTTOM" >> $SPECS
-    my_jspp __ lib/${FILE}.jspp lib/common.jspp lib/string.jspp lib/specs.jspp "$SPECS" -o tmp/specs.js
+    my_jspp __ src/${FILE}.jspp src/common.jspp src/string.jspp src/specs.jspp "$SPECS" -o tmp/specs.js
 
     sh_color ORANGE "=== {{Running}}..."
     node tmp/specs.js
@@ -57,7 +61,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
 
   run-server)
     mkdir -p tmp/out tmp/in
-    local +x IN_FILE="specs/browser-specs/server.cr"
+    local +x IN_FILE="specs/browser/server.cr"
     local +x OUT_FILE="tmp/out/da_standard.server"
     if my_fs a-is-younger-than-b "$IN_FILE" "$OUT_FILE" ; then
       sh_color ORANGE "=== {{Compiling}} server..."
@@ -73,56 +77,21 @@ case "$(echo $ACTION $@ | xargs echo)" in
 
   run)
     reset
-    local +x FILES="$(find lib -maxdepth 1 -type f -name '*.jspp')"
-    local +x SPECS="tmp/specs.jspp"
-    local +x BROWSER_SPECS="tmp/browser.specs.jspp"
+    if [[ "$CHANGED_FILE" == *".cr" || "$CHANGED_FILE" == *".ecr" ]]; then
+      sh_color GREEN "=== {{Compiling}} da_standard.cr"
+      my_crystal __ build "src/da_standard.cr" -o tmp/da_standard
+    fi
+
+    local +x FILES="$(find src -maxdepth 1 -type f -name '*.jspp')"
 
     cd "$THIS_DIR"
-    mkdir -p tmp
+    mkdir -p tmp/out
 
-    sh_color ORANGE "=== {{Compiling}}..."
-    echo "" > $SPECS
+    sh_color ORANGE "=== {{Compiling}} js files..."
 
-    local +x TOP="import System; external window;";
-    local +x BOTTOM="";
-
-    for FILE in ${=FILES}; do
-      local +x LIB_NAME="$(basename "$FILE" .jspp)"
-      local +x FULL_NAME="DA_STANDARD.$(basename $FILE .jspp | tr '[a-z]' '[A-Z]')"
-      case "$LIB_NAME" in
-        DOM|browser)
-          TOP+="\nimport $FULL_NAME;"
-          for func in $(egrep -woh '^\ +[^\ ]+_specs\(\ *\)' "$FILE"); do
-            BOTTOM+="\nif (typeof window !== 'undefined' ) {\n"
-            BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
-            BOTTOM+="\n${FULL_NAME}.${func};"
-            BOTTOM+="\nConsole.log(\"\");"
-            BOTTOM+="\n}\n"
-          done
-          ;;
-
-        *)
-          TOP+="\nimport $FULL_NAME;"
-          for func in $(egrep -woh '[^\ ]+_specs\(\ *\)' "$FILE"); do
-            BOTTOM+="\n\nConsole.log(\"=== $func ===\");"
-            BOTTOM+="\n${FULL_NAME}.${func};"
-            BOTTOM+="\nConsole.log(\"\");"
-          done
-          ;;
-      esac
-    done
-
-    echo "$TOP" >> $SPECS
-    echo "$BOTTOM" >> $SPECS
-    echo "\nConsole.log(\"All specs PASSED.\");" >> $SPECS
-
-    echo "$TOP" >> $BROWSER_SPECS
-    echo "$BOTTOM" >> $BROWSER_SPECS
-    echo "\nConsole.log(\"All specs PASSED.\");" >> $BROWSER_SPECS
-    cat "specs/browser-specs/append.js" >> $BROWSER_SPECS
-
-    my_jspp __ ${=FILES} "$SPECS" -o tmp/specs.js
-    my_jspp __ ${=FILES} "$BROWSER_SPECS" -o tmp/browser.specs.js
+    tmp/da_standard write_specs
+    my_jspp __ ${=FILES} "tmp/out/node.jspp" -o tmp/specs.js
+    my_jspp __ ${=FILES} "tmp/out/browser.jspp" -o tmp/browser.specs.js
 
     sh_color ORANGE "=== {{Running}} on node..."
     node tmp/specs.js
