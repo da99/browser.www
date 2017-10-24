@@ -4,7 +4,7 @@
 
 
 exports.is_specs = is_specs;
-function is_specs(specs) {
+void is_specs(specs) {
   var is_valid_specs_i = or(is('init'), is(0), is_positive);
 
   be(is_plain_object,  specs);

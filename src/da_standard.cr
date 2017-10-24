@@ -18,7 +18,7 @@ class SPECS
     files.each do |file|
       File.read(file).split("\n").each { |raw|
         s = raw.strip
-        next unless s =~ /^(void|function)\ *([a-zA-Z0-9\_]+_specs\(\ *\))\ *\{\ */
+        next unless s =~ /^(void|function)\ *([a-zA-Z0-9\_]+_specs)\(\ *\)\ *\{\ */
         arr << "#{mod_name file}.#{$2}"
       }
     end

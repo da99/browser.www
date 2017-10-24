@@ -29,7 +29,7 @@ module DA_STANDARD.STRING
     return v.replace(WHITE_SPACE_REGEX, '').length < 1;
   }
 
-  function trim_specs() {
+  void trim_specs() {
     should_eq("a", string () { return trim(" a    "); });
     should_eq(['a', 'b', 'c'], string[] () { return trim("a;b;c".split(';')); });
     should_eq(['a', 'b', 'c'], string[] () { return trim("a ; b; ;  c".split(/;/)); });
@@ -53,7 +53,7 @@ module DA_STANDARD.STRING
     return fin;
   }
 
-  function standard_name_specs() {
+  void standard_name_specs() {
     should_eq("name name", string () { return standard_name('NAME NAME'); });  // it 'lowercases names'
     should_eq("name",      string () { return standard_name('  name  '); });   // it 'trims string'
     should_eq("n ame",     string () { return standard_name('n   aME');  });   // it 'squeezes whitespace'

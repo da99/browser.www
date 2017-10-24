@@ -7,32 +7,28 @@ import DA_STANDARD.COMMON;
 module DA_STANDARD.BROWSER
 {
 
-  function wait_max_specs() {
+  void wait_max_specs() {
     int i = 0;
-    wait_max(1, bool () { i = i + 1; if (i === 5) { return true; } return false; });
-    SPEC_STATE.wait_for(
-        void () { should_eq(5, i); },
-        1000
-        );
-  } // function wait_max_specs
+    wait_max(1, bool () { i = i + 1; if (i === 4) { return true; } return false; });
+    THE_SPECS.wait_for( void () { should_eq(4, i); }, 800);
+  } // void wait_max_specs
 
   void wait_max(int seconds, bool() func) {
-    int ms       = seconds * 1000;
-    int total    = 0;
+    int max      = seconds * 1000;
+    int current  = 0;
     int interval = 100;
 
     function reloop() {
-      total = total + interval;
+      current = current + interval;
       if (func())
         return true;
-      if (total > ms)
+      if (current >= max)
         throw new Error('Timeout exceeded: ' + inspect(func) );
       else
         setTimeout(reloop, interval);
     }
     reloop();
   } // === void wait_max
-
 
 } // === module DA_STANDARD.BROWSER
 

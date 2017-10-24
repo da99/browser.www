@@ -5,9 +5,9 @@ import System;
   import DA_STANDARD.<%= mod %>;
 <% end -%>
 
-<% spec_funcs.each do |func_call| %>
-  Console.log("=== <%= func_call %>");
-  DA_STANDARD.<%=func_call%>;
+<% spec_funcs.each do |func_name| %>
+  Console.log("=== <%= func_name %>");
+  DA_STANDARD.<%=func_name%>();
   Console.log("");
 <% end -%>
 

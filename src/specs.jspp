@@ -6,14 +6,43 @@ import DA_STANDARD.COMMON;
 module DA_STANDARD.SPECS
 {
 
-  class SPEC_STATE {
-    public static int count = 0;
+  class THE_SPECS {
+    public static int fail_count = 0;
+    public static var fail_list = [];
+    public static int pass_count = 0;
+    public static int wait_count = 0;
+    public static var spec_list = [];
+
     public static int wait_for(void() f, int interval) {
-      SPEC_STATE.count += 1;
-      setTimeout(void () { SPEC_STATE.count -= 1; f(); }, interval);
-      return SPEC_STATE.count;
+      THE_SPECS.wait_count += 1;
+      setTimeout(void () { THE_SPECS.wait_count -= 1; f(); }, interval);
+      return THE_SPECS.wait_count;
     }
-  }
+
+    public static void push(string name, void() f) {
+      spec_list.push([name, f]);
+    }
+
+    public static void run(void() passed, void() failed) {
+      while (THE_SPECS.spec_list.length > 0 && THE_SPECS.wait_count == 0) {
+        var pair = THE_SPECS.spec_list.shift();
+        Console.log("=== " + pair[0] + " ===");
+        pair[1]();
+        Console.log("");
+      }
+
+      if (THE_SPECS.wait_count == 0) {
+        if (THE_SPECS.fail_count > 0) {
+          failed();
+          throw new Error("Specs failed: \n" + THE_SPECS.fail_list.join("\n"));
+        } else
+          passed();
+      } else {
+        setTimeout(void () { THE_SPECS.run(passed, failed); }, 1000);
+      }
+    } // === void run(f)
+
+  } // === class THE_SPECS
 
   bool arrays_are_equal(a1, a2) {
     int len_1 = a1.length;
@@ -39,10 +68,17 @@ module DA_STANDARD.SPECS
         (actual != expected) &&
         !(is_array(expected) && is_array(actual) && arrays_are_equal(expected, actual))
        ) {
-      throw new Error(to_string(func_or_other) + " EXPECTED: " + to_string(expected) + " ACTUAL: " + to_string(actual));
+      failed(to_string(func_or_other), to_string(expected), to_string(actual));
     }
 
     Console.log("Pass: " + to_string(expected) + " == " + to_string(func_or_other) );
+  }
+
+  void failed(string msg, expected, actual) {
+    THE_SPECS.fail_count += 1;
+    string new_msg = msg + " EXPECTED: " + expected + " ACTUAL: " + actual;
+    THE_SPECS.fail_list.push(new_msg);
+    throw new Error(new_msg);
   }
 
   void should_eq(expected, func, ...args) {
@@ -55,7 +91,7 @@ module DA_STANDARD.SPECS
     }
 
     if (actual != expected) {
-      throw new Error(to_string(func) + " args: " + to_string(args) + " EXPECTED: " + to_string(expected) + " ACTUAL: " + to_string(actual));
+      failed(to_string(func) + " args: " + to_string(args), to_string(expected), to_string(actual));
     }
 
     Console.log("Pass: " + to_string(expected) + " == " + func.name + to_string(args));
@@ -64,7 +100,7 @@ module DA_STANDARD.SPECS
   void spec(f, args, expected) {
     var actual = f.apply(args);
     if (actual != expected) {
-      throw new Error(f + "(" + args + ") expected: " + expected + " but got " + actual);
+      failed(f + "(" + args + ")", expected, actual);
     }
     Console.log("Pass: " + f + "(" + args + ")");
   }
@@ -126,7 +162,7 @@ module DA_STANDARD.SPECS
   /*   throw new Error('Function has invalid arguments: ' + to_string(func)); */
   /* } */
 
-  /* function is_specs(specs) { */
+  /* void is_specs(specs) { */
   /*   var is_valid_specs_i = or(is('init'), is(0), is_positive); */
 
   /*   be(is_plain_object,  specs); */
