@@ -1,6 +1,6 @@
 
 import System;
-external window;
+external window, XMLHttpRequest, JSON, setInterval, setTimeout;
 
 <% modules.each do |mod| %>
   import DA_STANDARD.<%= mod %>;
@@ -12,17 +12,65 @@ external window;
   Console.log("");
 <% end -%>
 
+window.document.querySelector("#Spec_Stage").innerHTML = "<div class=\"passed\">All specs <span class=\"passed\">PASSED</span>.</div>";
+
+function send(string meth, string path, o) {
+  var xhr = new XMLHttpRequest();
+
+  xhr.open(meth, path);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function() {
+    if (xhr.status !== 200) {
+      window.alert('Request failed.  Returned status of ' + xhr.status);
+    }
+  };
+  xhr.send(JSON.stringify(o));
+} // === function post_msg
+
 Console.log("All specs PASSED.");
 Console.log("JS file compiled at: <%= Time.now.to_s("%I:%M:%S %D") %>");
+send("POST", "/to-console", "All specs PASSED.");
 
-if (typeof window !== 'undefined') {
-  window.document.querySelector("#Spec_Stage").innerHTML = "<div class=\"passed\">All specs <span class=\"passed\">PASSED</span>.</div>";
+class PAGE_STATE {
+  public static string m_time = "";
+  public static bool keep_checking = true;
 }
 
-// try {
+function reload_page() {
+  if (!PAGE_STATE.keep_checking)
+    return;
 
-//   Dum_Dum_Boom_Boom.common.spec.spec(function (msg) {
+  var xhr = new XMLHttpRequest();
+
+  xhr.open("GET", "/do-reload");
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function() {
+    if (xhr.status !== 200)
+      return;
+
+    string old = PAGE_STATE.m_time;
+    if (old === "") {
+      PAGE_STATE.m_time = xhr.response;
+      return;
+    }
+
+    if (old !== xhr.response) {
+      PAGE_STATE.keep_checking = true;
+      window.location.reload(true);
+    } else {
+      PAGE_STATE.m_time = xhr.response;
+    }
+  };
+  xhr.send(JSON.stringify("checking..."));
+}
+
+setInterval(reload_page, 1000);
+
+
+
+// try {
 //     "use strict";
+//   Dum_Dum_Boom_Boom.common.spec.spec(function (msg) {
 //     alite({url: "/all-specs-pass", method: "POST", data: msg}).then(
 //       function (result) {
 //         var dt = new Date();

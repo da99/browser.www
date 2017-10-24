@@ -27,7 +27,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
   "run "*)
     reset
     local +x FILE="$@"
-    local +x SPECS="tmp/specs.jspp"
+    local +x SPECS="tmp/node.jspp"
 
     cd "$THIS_DIR"
     mkdir -p tmp
@@ -52,10 +52,10 @@ case "$(echo $ACTION $@ | xargs echo)" in
 
     echo "$TOP" >> $SPECS
     echo "$BOTTOM" >> $SPECS
-    my_jspp __ src/${FILE}.jspp src/common.jspp src/string.jspp src/specs.jspp "$SPECS" -o tmp/specs.js
+    my_jspp __ src/${FILE}.jspp src/common.jspp src/string.jspp src/specs.jspp "$SPECS" -o tmp/node.js
 
     sh_color ORANGE "=== {{Running}}..."
-    node tmp/specs.js
+    node tmp/node.js
     sh_color GREEN "=== {{DONE}} ===";
     ;;
 
@@ -73,11 +73,14 @@ case "$(echo $ACTION $@ | xargs echo)" in
     pkill -f tmp/out/da_standard.server || :
     sh_color ORANGE "=== {{Running}} server..."
     tmp/out/da_standard.server &
+    process loop every 1s max 4 or until curl --silent -I http://localhost:3010/ &>/dev/null
+    touch tmp/do-reload
+    sh_color GREEN "=== Server is {{running}} ===";
     ;;
 
   run)
     reset
-    if [[ "$CHANGED_FILE" == *".cr" || "$CHANGED_FILE" == *".ecr" ]]; then
+    if [[ "$CHANGED_FILE" == *"da_standard.cr" || "$CHANGED_FILE" == *".ecr" ]]; then
       sh_color GREEN "=== {{Compiling}} da_standard.cr"
       my_crystal __ build "src/da_standard.cr" -o tmp/da_standard
     fi
@@ -90,14 +93,13 @@ case "$(echo $ACTION $@ | xargs echo)" in
     sh_color ORANGE "=== {{Compiling}} js files..."
 
     tmp/da_standard write_specs
-    my_jspp __ ${=FILES} "tmp/out/node.jspp" -o tmp/specs.js
-    my_jspp __ ${=FILES} "tmp/out/browser.jspp" -o tmp/browser.specs.js
+    my_jspp __ ${=FILES} "tmp/out/node.jspp" -o tmp/node.js
+    my_jspp __ ${=FILES} "tmp/out/browser.jspp" -o tmp/browser.js
 
     sh_color ORANGE "=== {{Running}} on node..."
-    node tmp/specs.js
+    node tmp/node.js
 
     da_standard.jspp specs run-server
-    sh_color GREEN "=== {{DONE}} ===";
     ;;
 
   *)

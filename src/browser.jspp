@@ -12,7 +12,7 @@ module DA_STANDARD.BROWSER
     wait_max(1, bool () { i = i + 1; if (i === 5) { return true; } return false; });
     SPEC_STATE.wait_for(
         void () { should_eq(5, i); },
-        800
+        1000
         );
   } // function wait_max_specs
 
