@@ -1,5 +1,5 @@
 
-external document;
+external document, window;
 import DA_STANDARD.STRING;
 import DA_STANDARD.COMMON;
 import DA_STANDARD.SPECS;
@@ -28,37 +28,51 @@ module DA_STANDARD.DOM {
 
   } // === class ID_STATE
 
-  void query_selector_specs() {
+  void doc_node_specs() {
     THE_STAGE.reset('<div id="query_selector_id">hello</div>');
     should_eq("hello", DOC.node("#query_selector_id").html());
   }
+  void doc_node_list_specs() {
+    THE_STAGE.reset('<div class="node_list">hello</div><div class="node_list">hello 2</div>');
+    should_eq(2, DOC.node_list("div.node_list").length());
+  }
 
   class DOC {
-    public static Element node(string s) {
-      return new Element(document.querySelector(s));
+    public static NODE node(string s) {
+      return new NODE(document.querySelector(s));
     }
 
-    public static NodeList node_list(string s) {
-      return new NodeList(document.querySelectorAll(s));
+    public static NODE_LIST node_list(string s) {
+      return new NODE_LIST(document.querySelectorAll(s));
+    }
+
+    public static void add_event(string event_name, string selector, f) {
+      document.addEventListener(event_name, void (e) { if (!e.target.matches(selector)) return; f(e); });
     }
   } // class DOC
 
-  class NodeList {
-    public var origin;
+  void node_add_class_specs() {
+    THE_STAGE.reset('<div>hello</div>');
+    DOC.node("#THE_STAGE div").add_class("red_hot");
+    should_eq(1, DOC.node_list("div.red_hot").length());
+  }
 
-    public property int length () {
+  class NODE_LIST {
+    private var origin;
+
+    public int length () {
       return this.origin.length;
     }
 
-    public NodeList(v) {
+    public NODE_LIST(v) {
       this.origin = v;
     }
 
-    public Element item(int i) {
-      return new Element(this.origin[i]);
+    public NODE item(int i) {
+      return new NODE(this.origin[i]);
     }
 
-    public NodeList add_class(string new_name) {
+    public NODE_LIST add_class(string new_name) {
       int l = this.origin.length;
       for(int i = 0; i < l; i++) {
         this.item(i).add_class(new_name);
@@ -66,7 +80,7 @@ module DA_STANDARD.DOM {
       return this;
     }
 
-    public NodeList remove_class(string target) {
+    public NODE_LIST remove_class(string target) {
       int l = this.origin.length;
       for(int i = 0; i < l; i++) {
         this.item(i).remove_class(target);
@@ -76,11 +90,11 @@ module DA_STANDARD.DOM {
 
   } // class NodeList
 
-  class Element {
+  class NODE {
 
     public var origin;
 
-    public Element(v) {
+    public NODE(v) {
       this.origin = v || (new document.createElement("div"));
     }
 
@@ -88,14 +102,32 @@ module DA_STANDARD.DOM {
       return this.origin.innerHTML;
     }
 
-    public Element add_class(string new_class) {
+    public string text() {
+      return this.origin.textValue;
+    }
+
+    public NODE show() {
+      this.origin.style.display = "";
+      return this;
+    }
+
+    public NODE hide() {
+      this.origin.style.display = "none";
+      return this;
+    }
+
+    public NODE add_class(string new_class) {
       this.origin.classList.add(new_class);
       return this;
     }
 
-    public Element remove_class(string target) {
+    public NODE remove_class(string target) {
       this.origin.classList.remove(target);
       return this;
+    }
+
+    public bool has_class(string target) {
+      return this.origin.classList.contains(target);
     }
 
     public bool has_attr(string raw_name) {
@@ -110,7 +142,7 @@ module DA_STANDARD.DOM {
       return trim( this.origin.getAttribute(name) || "" );
     }
 
-    public Element attr(string raw_name, string raw_val) {
+    public NODE attr(string raw_name, string raw_val) {
       string name = trim(raw_name);
       string val  = trim(raw_val);
       this.origin.setAttribute(name, val);

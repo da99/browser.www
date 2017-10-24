@@ -1,0 +1,24 @@
+
+external XMLHttpRequest, JSON;
+
+
+module DA_STANDARD.SEND {
+  void get(string path, msg, f) {
+    return SEND.send("GET", path, msg, f);
+  }
+
+  void post(string path, msg, f) {
+    return SEND.send("POST", path, msg, f);
+  }
+
+  void send(string meth, string path, msg, f) {
+    var x = new XMLHttpRequest();
+    x.open(meth, path);
+    x.setRequestHeader('Content-Type', "application/json");
+    x.onload = void () {
+      f(x);
+    };
+    x.send(JSON.stringify(msg));
+  }
+} // === module SEND
+

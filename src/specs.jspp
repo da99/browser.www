@@ -7,13 +7,42 @@ module DA_STANDARD.SPECS
 {
 
   class THE_SPECS {
-    public static int fail_count = 0;
     public static var fail_list = [];
     public static int pass_count = 0;
     public static int wait_count = 0;
     public static var spec_list = [];
 
-    public static int wait_for(void() f, int interval) {
+    public static int timeout(bool() cond, void() f) {
+      THE_SPECS.wait_count += 1;
+      int max = 5;
+      int count = 0;
+
+      void reloop() {
+        count += 1;
+        if (count >= max) {
+          THE_SPECS.wait_count -= 1;
+          failed("Gave up waiting for test: " + COMMON.to_string(cond), true, cond());
+          return;
+        }
+
+        if (cond() === true) {
+          THE_SPECS.wait_count -= 1;
+          f();
+          return;
+        }
+
+        setTimeout(reloop, 150);
+      }
+      reloop();
+
+      return THE_SPECS.wait_count;
+    }
+
+    public static int timeout(void() f) {
+      return THE_SPECS.timeout(f, 5000);
+    }
+
+    public static int timeout(void() f, int interval) {
       THE_SPECS.wait_count += 1;
       setTimeout(void () { THE_SPECS.wait_count -= 1; f(); }, interval);
       return THE_SPECS.wait_count;
@@ -23,7 +52,7 @@ module DA_STANDARD.SPECS
       spec_list.push([name, f]);
     }
 
-    public static void run(void() passed, void() failed) {
+    public static void run(void() passed, void() they_failed) {
       while (THE_SPECS.spec_list.length > 0 && THE_SPECS.wait_count == 0) {
         var pair = THE_SPECS.spec_list.shift();
         Console.log("=== " + pair[0] + " ===");
@@ -32,13 +61,13 @@ module DA_STANDARD.SPECS
       }
 
       if (THE_SPECS.wait_count == 0) {
-        if (THE_SPECS.fail_count > 0) {
-          failed();
+        if (THE_SPECS.fail_list.length > 0) {
+          they_failed();
           throw new Error("Specs failed: \n" + THE_SPECS.fail_list.join("\n"));
         } else
           passed();
       } else {
-        setTimeout(void () { THE_SPECS.run(passed, failed); }, 1000);
+        setTimeout(void () { THE_SPECS.run(passed, they_failed); }, 1000);
       }
     } // === void run(f)
 
@@ -75,10 +104,8 @@ module DA_STANDARD.SPECS
   }
 
   void failed(string msg, expected, actual) {
-    THE_SPECS.fail_count += 1;
     string new_msg = msg + " EXPECTED: " + expected + " ACTUAL: " + actual;
     THE_SPECS.fail_list.push(new_msg);
-    throw new Error(new_msg);
   }
 
   void should_eq(expected, func, ...args) {
@@ -378,12 +405,5 @@ module DA_STANDARD.SPECS
   /*     } // === compare_actual */
   /*   } // === function regular_spec */
 
-  /* } // === function spec */
-
-  /* function default_msg(msg) { */
-  /*   log('      ======================================'); */
-  /*   log('      Specs Finish: ' + to_string(msg.total) + ' tests'); */
-  /*   log('      ======================================'); */
-  /* }; */
 
 } // === DA_STANDARD.SPECS

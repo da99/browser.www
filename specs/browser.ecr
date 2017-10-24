@@ -28,13 +28,6 @@ function send(string meth, string path, o) {
 } // === function post_msg
 
 Console.log("JS file compiled at: <%= Time.now.to_s("%I:%M:%S %D") %>");
-THE_SPECS.run(void () {
-  window.document.querySelector("#THE_STAGE").innerHTML = "<div class=\"passed\">All specs <span class=\"passed\">PASSED</span>.</div>";
-  Console.log("All specs PASSED.");
-  send("POST", "/to-console", "All specs PASSED.");
-}, void () {
-  send("POST", "/to-console", "Specs failed.");
-});
 
 class PAGE_STATE {
   public static string m_time = "";
@@ -61,9 +54,7 @@ function reload_page() {
 
     if (old !== xhr.response) {
       PAGE_STATE.keep_checking = true;
-      // setTimeout(function () {
       window.location.reload(true);
-      // }, 1000);
     } else {
       PAGE_STATE.m_time = xhr.response;
     }
@@ -71,8 +62,15 @@ function reload_page() {
   xhr.send(JSON.stringify("checking..."));
 }
 
-setInterval(reload_page, 1000);
+setInterval(reload_page, 500);
 
+THE_SPECS.run(void () {
+  window.document.querySelector("#THE_STAGE").innerHTML = "<div class=\"passed\">All specs <span class=\"passed\">PASSED</span>.</div>";
+  Console.log("All specs PASSED.");
+  send("POST", "/to-console", "All specs PASSED.");
+}, void () {
+  send("POST", "/to-console", "Specs FAILED.");
+});
 
 
 // try {

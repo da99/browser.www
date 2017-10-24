@@ -7,4 +7,3 @@ Manuals:
   * [HTML](./docs/HTML.md)
   * [Design](./docs/DESIGN.md)
 
-
