@@ -11,7 +11,7 @@ function spec_dom(cmd) {
 
   switch (cmd) {
     case 'reset':
-      var stage = $('#Spec_Stage');
+      var stage = $('#THE_STAGE');
       if (stage.length === 0)
         $('body').prepend('<div id="Spec_Stage"></div>');
       else

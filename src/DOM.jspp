@@ -28,12 +28,17 @@ module DA_STANDARD.DOM {
 
   } // === class ID_STATE
 
-  class Document {
-    public static Element querySelector(string s) {
+  void query_selector_specs() {
+    THE_STAGE.reset('<div id="query_selector_id">hello</div>');
+    should_eq("hello", DOC.node("#query_selector_id").html());
+  }
+
+  class DOC {
+    public static Element node(string s) {
       return new Element(document.querySelector(s));
     }
 
-    public static NodeList querySelectorAll(string s) {
+    public static NodeList node_list(string s) {
       return new NodeList(document.querySelectorAll(s));
     }
   } // class DOC
@@ -76,7 +81,11 @@ module DA_STANDARD.DOM {
     public var origin;
 
     public Element(v) {
-      this.origin = v;
+      this.origin = v || (new document.createElement("div"));
+    }
+
+    public string html() {
+      return this.origin.innerHTML;
     }
 
     public Element add_class(string new_class) {
@@ -132,10 +141,6 @@ module DA_STANDARD.DOM {
     } // === id
 
   } // === class Element
-
-  public NodeList query(string q) {
-    return Document.querySelectorAll(q);
-  }
 
 } // === DA_STANDARD.DOM
 

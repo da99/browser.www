@@ -106,7 +106,7 @@ Simplicity and power come from:
 Specs:
 ======
 
-  1. Specs run in the browser if `window` and `#Spec_Stage` are defined.
+  1. Specs run in the browser if `window` and `#THE_STAGE` are defined.
 
   2. Use [js\_setup upgrade](https://github.com/da99/js_setup) to upgrade bower components.
       *NOTE*: Use version numbers in `package.json`, and `latest` for bower.json.

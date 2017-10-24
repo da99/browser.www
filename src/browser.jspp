@@ -9,8 +9,8 @@ module DA_STANDARD.BROWSER
 
   void wait_max_specs() {
     int i = 0;
-    wait_max(1, bool () { i = i + 1; if (i === 4) { return true; } return false; });
-    THE_SPECS.wait_for( void () { should_eq(4, i); }, 800);
+    wait_max(2, bool () { i = i + 1; if (i === 4) { return true; } return false; });
+    THE_SPECS.wait_for( void () { should_eq(4, i); }, 500);
   } // void wait_max_specs
 
   void wait_max(int seconds, bool() func) {

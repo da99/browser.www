@@ -1,5 +1,5 @@
 
-external Error, setTimeout;
+external Error, setTimeout, window;
 import System.Console;
 import DA_STANDARD.COMMON;
 
@@ -104,6 +104,12 @@ module DA_STANDARD.SPECS
     }
     Console.log("Pass: " + f + "(" + args + ")");
   }
+
+  class THE_STAGE {
+    public static void reset(string html) {
+      window.document.querySelector("#THE_STAGE").innerHTML = html;
+    }
+  } // === class THE_STAGE
 
   /* function spec_next(specs) { */
 

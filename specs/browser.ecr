@@ -13,7 +13,6 @@ external window, XMLHttpRequest, JSON, setInterval, setTimeout;
   );
 <% end -%>
 
-window.document.querySelector("#Spec_Stage").innerHTML = "<div class=\"passed\">All specs <span class=\"passed\">PASSED</span>.</div>";
 
 function send(string meth, string path, o) {
   var xhr = new XMLHttpRequest();
@@ -30,6 +29,7 @@ function send(string meth, string path, o) {
 
 Console.log("JS file compiled at: <%= Time.now.to_s("%I:%M:%S %D") %>");
 THE_SPECS.run(void () {
+  window.document.querySelector("#THE_STAGE").innerHTML = "<div class=\"passed\">All specs <span class=\"passed\">PASSED</span>.</div>";
   Console.log("All specs PASSED.");
   send("POST", "/to-console", "All specs PASSED.");
 }, void () {
