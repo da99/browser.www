@@ -1,13 +1,12 @@
 {
    "name": "da_standard",
-   "version": "5.0.1",
-   "main": "build/node.js",
-   "description": "Personal way of writing nodejs and browser/html apps",
+   "version": "6.0.0",
+   "description": "My base lib for JS/JSPP projects.",
    "repository": {
       "type": "git",
       "url": "git@github:da99/da_standard.jspp.git"
    },
-   "keywords": [],
+   "keywords": ["jspp"],
    "bin": {},
    "author": "da99",
    "license": "MIT",
