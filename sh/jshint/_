@@ -1,4 +1,5 @@
-
+#!/usr/bin/env zsh
+#
 jshint () {
     # === __ jshint
     TEMP_FILE=$TEMP/fail_jshint

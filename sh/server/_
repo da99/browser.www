@@ -1,4 +1,5 @@
-
+#!/usr/bin/env zsh
+#
 # === Starts server for development and testing purposes:
 # === {{CMD}}  start
 # === Shutdowns down dev/test server.

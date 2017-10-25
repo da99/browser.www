@@ -1,4 +1,5 @@
-
+#!/usr/bin/env zsh
+#
 # === {{CMD}}
 install_html_validator () {
     cd "$THIS_DIR"
