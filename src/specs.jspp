@@ -105,7 +105,10 @@ module DA_STANDARD.SPECS
 
   void failed(string msg, expected, actual) {
     string new_msg = msg + " EXPECTED: " + expected + " ACTUAL: " + actual;
-    THE_SPECS.fail_list.push(new_msg);
+    if (typeof window === 'undefined')
+      throw new Error("Failed: " + to_string(expected) + " !== " + to_string(actual));
+    else
+      THE_SPECS.fail_list.push(new_msg);
   }
 
   void should_eq(expected, func, ...args) {

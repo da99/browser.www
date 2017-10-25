@@ -14,7 +14,7 @@ external window, XMLHttpRequest, JSON, setInterval, setTimeout;
 <% end -%>
 
 
-function send(string meth, string path, o) {
+function send_message(string meth, string path, o) {
   var xhr = new XMLHttpRequest();
 
   xhr.open(meth, path);
@@ -67,9 +67,9 @@ setInterval(reload_page, 500);
 THE_SPECS.run(void () {
   window.document.querySelector("#THE_STAGE").innerHTML = "<div class=\"passed\">All specs <span class=\"passed\">PASSED</span>.</div>";
   Console.log("All specs PASSED.");
-  send("POST", "/to-console", "All specs PASSED.");
+  send_message("POST", "/to-console", "All specs PASSED.");
 }, void () {
-  send("POST", "/to-console", "Specs FAILED.");
+  send_message("POST", "/to-console", "Specs FAILED.");
 });
 
 

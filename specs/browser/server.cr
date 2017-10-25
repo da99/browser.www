@@ -168,7 +168,7 @@ spawn {
     is_alive = $?.normal_exit? && $?.exit_code == 0
 
     if !is_alive
-      puts "=== Process gone: #{pid}. Exiting."
+      puts "=== Process gone: #{pid}. Server is exiting..."
       server.close
       break
     end

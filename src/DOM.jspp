@@ -90,6 +90,19 @@ module DA_STANDARD.DOM {
 
   } // class NodeList
 
+  void node_hide_specs() {
+    THE_STAGE.reset('<div id="hide_factor">Factor</div>');
+    DOC.node("#hide_factor").hide();
+    should_eq("none", document.querySelector("#hide_factor").style.display);
+  }
+
+  void node_show_specs() {
+    THE_STAGE.reset('<div id="show_factor" style="display: inline">Factor</div>');
+    DOC.node("#show_factor").hide();
+    DOC.node("#show_factor").show();
+    should_eq("", document.querySelector("#show_factor").style.display);
+  }
+
   class NODE {
 
     public var origin;

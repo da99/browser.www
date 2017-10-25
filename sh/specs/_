@@ -79,6 +79,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
     ;;
 
   run)
+    CHANGED_FILE="${CHANGED_FILE:-}"
     reset
     if [[ "$CHANGED_FILE" == *"da_standard.cr" || "$CHANGED_FILE" == *".ecr" ]]; then
       sh_color GREEN "=== {{Compiling}} da_standard.cr"

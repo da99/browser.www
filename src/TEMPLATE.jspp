@@ -1,0 +1,52 @@
+
+external Error;
+import DA_STANDARD.SPECS;
+import System;
+
+module DA_STANDARD.TEMPLATE {
+
+  class STATE {
+    public static string[] allowed = [
+      escape_char('&'), escape_char('<'), escape_char('>')
+    ];
+    public static RegExp replace_pattern = new RegExp( '(?:' + allowed.join('|') + ')', 'g');
+  }
+
+  void unescape_specs() {
+    string s = "&#x3c;p id=\"main\" class=\"red hot\"&#x3e;&#x26;#x22;&#x26;#x27;hello&#x26;#x27;&#x26;#x22;&#x3c;/p&#x3e;";
+    should_eq('<p id="main" class="red hot">&#x22;&#x27;hello&#x27;&#x22;</p>', TEMPLATE.unescape(s));
+  }
+
+  string escape_char(string x) {
+    switch (x) {
+      case '&' : return "&#x26;";
+      case '<' : return "&#x3c;";
+      case '>' : return "&#x3e;";
+      case '"' : return "&#x22;";
+      case "'" : return "&#x27;";
+      case '`' : return "&#x60;";
+      case '{' : return "&#x7b;";
+      case '}' : return "&#x7d;";
+      default: throw new Error("Unknown string to escape for Template");
+    }
+  }
+
+  string unescape_string(string s) {
+    switch (s) {
+      case "&#x26;" : return '&';
+      case "&#x3c;" : return '<';
+      case "&#x3e;" : return '>';
+      /* case "&#x22;" : return '"'; */
+      /* case "&#x27;" : return "'"; */
+      /* case "&#x60;" : return '`'; */
+      /* case "&#x7b;" : return '{'; */
+      /* case "&#x7d;" : return '}'; */
+      default: throw new Error("Unknown string to unescape for Template");
+    }
+  }
+
+  string unescape(string source) {
+    return source.replace(TEMPLATE.STATE.replace_pattern, unescape_string);
+  }
+
+} // === module TEMPLATE
