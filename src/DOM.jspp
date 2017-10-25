@@ -103,6 +103,12 @@ module DA_STANDARD.DOM {
     should_eq("", document.querySelector("#show_factor").style.display);
   }
 
+  void node_outer_html_specs() {
+    string html = '<div id="node_outer_html">hello</div>';
+    THE_STAGE.reset(html);
+    should_eq(html, DOC.node('#node_outer_html').outer_html());
+  }
+
   class NODE {
 
     public var origin;
@@ -113,6 +119,10 @@ module DA_STANDARD.DOM {
 
     public string html() {
       return this.origin.innerHTML;
+    }
+
+    public string outer_html() {
+      return this.origin.outerHTML;
     }
 
     public string text() {
@@ -186,6 +196,17 @@ module DA_STANDARD.DOM {
     } // === id
 
   } // === class Element
+
+  void html_unescape_all_specs() {
+    should_eq('<p>{{1}}</p>', html_unescape_all("&lt;p&gt;&#123;&#123;1&#125;&#125;&lt;/p&gt;"));
+  }
+
+  string html_unescape_all(string raw) {
+    // From: http://stackoverflow.com/questions/1912501/unescape-html-entities-in-javascript
+    return (new window.DOMParser().parseFromString(raw, "text/html"))
+      .documentElement
+      .textContent;
+  }
 
 } // === DA_STANDARD.DOM
 
