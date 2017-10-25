@@ -5,6 +5,12 @@ import DA_STANDARD.OBJECT;
 import DA_STANDARD.COMMON;
 import System;
 
+// === TEMPLATEs in DA_STANDARD are inspired by Mustache.
+// === * No partials are included. (This should be taken care of
+// ===   by the scripting lang. used to generate the templates.
+// === * By default, the values are included AS IS, no escaping.
+// ===   Escaping should be done by the server passing the info.
+// ===   to the browser/client.
 module DA_STANDARD.TEMPLATE {
 
   class STATE {
