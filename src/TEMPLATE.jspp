@@ -1,6 +1,8 @@
 
-external Error;
+external Error, arguments;
 import DA_STANDARD.SPECS;
+import DA_STANDARD.OBJECT;
+import DA_STANDARD.COMMON;
 import System;
 
 module DA_STANDARD.TEMPLATE {
@@ -48,5 +50,62 @@ module DA_STANDARD.TEMPLATE {
   string unescape(string source) {
     return source.replace(TEMPLATE.STATE.replace_pattern, unescape_string);
   }
+
+  void template_render_specs() {
+    string str = "a {{abc}} {{unknown}} b {{# arr }} {{a}}->{{abc}} {{/arr}} {{#o}} {{inner}} {{/o}}";
+    var o      = {a: "default", abc: " A-B-C ", arr: [{a: "a"},{a: "b"},{a: "c"}], o: {inner: "inside"}, name: " BWC "};
+    should_eq(
+        "a  A-B-C  {{unknown}} b  a-> A-B-C   b-> A-B-C   c-> A-B-C    inside ",
+        TEMPLATE.render(str, o)
+    );
+
+  }
+
+  string render(string raw, obj) {
+    return render_var(
+        render_iter(raw, obj),
+        obj
+        );
+  }
+
+  string render_var(string raw, obj) {
+    return raw.replace(/\{\{([a-zA-Z0-9\_]+)\}\}/g, string (string matched) {
+        string key = arguments[1];
+        if (obj.hasOwnProperty(key)) { return obj[key]; }
+        return matched;
+        });
+  }
+
+  string render_array(string partial, obj, arr) {
+    string rendered = "";
+    for (int i = 0; i < arr.length; i++) {
+      rendered += render(partial, OBJECT.assign(obj, (arr[i].constructor == {}.constructor ? arr[i] : {})));
+    }
+    return rendered;
+  }
+
+  string render_obj(string partial, o1, o2) {
+    return render(partial, OBJECT.assign(o1, o2));
+  }
+
+  string render_iter(string str, obj) {
+    return str.replace(
+        /\{\{#\ *([^\}]+)\ *\}\}(.+)\{\{\/\ *\1\ *\}\}/g,
+        string (string matched) {
+          string key     = arguments[1];
+          string partial = arguments[2];
+
+          if (obj.hasOwnProperty(key)) {
+            var inner_o = obj[key];
+            if (is_array(inner_o)) {
+              return render_array(partial, obj, inner_o);
+            }
+            return render_obj(partial, obj, inner_o);
+          }
+
+          return matched;
+        }
+    );
+  } // === string render_iter
 
 } // === module TEMPLATE

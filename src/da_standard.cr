@@ -42,11 +42,14 @@ class BROWSER_SPECS < SPECS
 end # === class BROWSER_SPECS
 
 case ARGV.first?
+
 when "write_specs"
   Dir.mkdir_p("tmp/out")
   File.write("tmp/out/node.jspp", NODE_SPECS.new.to_s)
   File.write("tmp/out/browser.jspp", BROWSER_SPECS.new.to_s)
+
 else
   STDERR.puts "!!! Invalid arguments: #{ARGV.inspect}"
   Process.exit(2)
+
 end # === case ARGV.first?

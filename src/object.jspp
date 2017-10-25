@@ -1,6 +1,15 @@
 
-external Error;
+external Error, Object;
 
 module DA_STANDARD.OBJECT {
+
+  function assign(...args) {
+    var o = {};
+    int len = args.length;
+    for(int i = 0; i < len; i++) {
+      o = Object.assign(o, args[i]);
+    }
+    return o;
+  }
 
 } // === module DA_STANDARD.OBJECT
