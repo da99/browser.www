@@ -59,21 +59,34 @@ module DA_STANDARD.TEMPLATE {
         TEMPLATE.render(str, o)
     );
 
-  }
+    should_eq( " No name here. ", TEMPLATE.render("{{^name}} No name here. {{/name}}", {name: false}));
+    should_eq( " No names. ", TEMPLATE.render("{{^names}} No names. {{/names}}", {names: []}));
+    should_eq( " COMMENT: one line", TEMPLATE.render(" COMMENT: one line{{! This is nice. }}", {names: []}));
+
+  } // === template_render_specs
 
   string render(string raw, obj) {
     return render_var(
-        render_iter(raw, obj),
+        render_iter(
+          remove_comment(raw),
+          obj),
         obj
         );
   }
 
+  string remove_comment(string raw) {
+    return raw.replace(/\{\{\!([^\{]+)\}\}/g, "");
+  }
+
   string render_var(string raw, obj) {
-    return raw.replace(/\{\{([a-zA-Z0-9\_]+)\}\}/g, string (string matched) {
-        string key = arguments[1];
-        if (obj.hasOwnProperty(key)) { return obj[key]; }
+    return raw.replace(/\{\{([\!])?\ *([a-zA-Z0-9\_]+)\ *\}\}/g, string (string matched) {
+      string modifier = arguments[1];
+      string key      = arguments[2];
+      if (modifier == "!")
+        return "";
+      if (obj.hasOwnProperty(key)) { return("" + obj[key]); }
         return matched;
-        });
+      });
   }
 
   string render_array(string partial, obj, arr) {
@@ -90,18 +103,38 @@ module DA_STANDARD.TEMPLATE {
 
   string render_iter(string str, obj) {
     return str.replace(
-        /\{\{#\ *([^\}]+)\ *\}\}(.+)\{\{\/\ *\1\ *\}\}/g,
+        /\{\{([\#\^])\ *([^\}]+)\ *\}\}(.+)\{\{\/\ *\2\ *\}\}/g,
         string (string matched) {
-          string key     = arguments[1];
-          string partial = arguments[2];
+          string s_type  = arguments[1];
+          string key     = arguments[2];
+          string partial = arguments[3];
 
-          if (obj.hasOwnProperty(key)) {
-            var inner_o = obj[key];
-            if (is_array(inner_o)) {
-              return render_array(partial, obj, inner_o);
-            }
-            return render_obj(partial, obj, inner_o);
-          }
+          switch (s_type) {
+            case "#":
+              if (obj.hasOwnProperty(key)) {
+                var inner_o = obj[key];
+                if (is_array(inner_o)) {
+                  return render_array(partial, obj, inner_o);
+                }
+                return render_obj(partial, obj, inner_o);
+              }
+              break;
+
+            case "!":
+              return "";
+              break;
+
+            case "^":
+              var x = obj.hasOwnProperty(key) && obj[key];
+              bool do_it = !x || (is_array(x) && x.length == 0);
+              if (do_it) {
+                return render(partial, obj);
+              }
+              break;
+
+            default:
+              throw new Error("Unknown section type: " + s_type);
+          } // === switch type
 
           return matched;
         }

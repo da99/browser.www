@@ -1,10 +1,12 @@
 
-import System;
 import DA_STANDARD.SPECS;
 import System.Console;
 
 module DA_STANDARD.STRING
 {
+
+  class STATE {
+  } // === class STATE
 
   void is_whitespace_specs() {
     should_eq(true, bool () { return is_whitespace("   "); });
@@ -12,8 +14,7 @@ module DA_STANDARD.STRING
   }
 
   bool is_whitespace(string v) {
-    var ans = v.match(/^\s+$/g);
-    if (ans && (ans.length || 0) > 0)
+    if (v.length > 0 && trim(v).length == 0)
       return true;
     return false;
   }
@@ -25,8 +26,7 @@ module DA_STANDARD.STRING
   }
 
   bool is_blank(string v) {
-    System.RegExp WHITE_SPACE_REGEX = /^\s+|\s+$/g;
-    return v.replace(WHITE_SPACE_REGEX, '').length < 1;
+    return trim(v).length < 1;
   }
 
   void trim_specs() {
@@ -37,16 +37,21 @@ module DA_STANDARD.STRING
     should_eq(['form', 'id'],  string[] () { return trim('form.id'.split('.')); });
   }
 
+  // Use native String.prototype.trim
+  //   because it handles more whitespace chars.
   string trim(string raw) {
-    return raw.replace(/^\s+|\s+$/g, "");
+    var o = raw;
+    return o.trim(); 
   }
 
   string[] trim(string[] raw) {
     int len        = raw.length;
     string[] fin   = [];
     string trimmed = "";
+    var o;
     for (int i = 0; i < len; i++) {
-      trimmed = trim(raw[i]);
+      o = raw[i];
+      trimmed = o.trim();
       if (trimmed.length !== 0)
         fin.push(trimmed);
     }
@@ -59,8 +64,8 @@ module DA_STANDARD.STRING
     should_eq("n ame",     string () { return standard_name('n   aME');  });   // it 'squeezes whitespace'
   }
 
-  string standard_name(string str) {
-    return trim(str.replace(/\s+/g, ' ')).toLowerCase();
+  string standard_name(string raw) {
+    return trim(raw.replace(/[\s\uFEFF\xA0]+/g, ' ')).toLowerCase();
   }
 
 } // === module DA_STANDARD
