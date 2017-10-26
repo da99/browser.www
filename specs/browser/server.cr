@@ -7,7 +7,7 @@ PORT = 3010
 
 
 def pass_fail_color(s : String)
-  s = s.gsub(/PASS([a-z]{2})?/i) do |s|
+  s = s.gsub(/(Scratch was loaded|PASS)([a-z]{2})?/i) do |s|
     s.colorize(:green)
   end
   s = s.gsub(/FAIL([a-z]{2})?/i) do |s|
@@ -109,7 +109,7 @@ class Router
   end
 
   post("/to-console") do
-    puts "Browser: #{pass_fail_color request_body}"
+    puts "Browser says: #{pass_fail_color request_body}"
     write_json({success: "Received: #{request_body}"})
   end
 

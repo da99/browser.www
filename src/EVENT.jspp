@@ -8,33 +8,78 @@ import System.Console;
 module DA_STANDARD.EVENT {
 
   class FUNCS {
-    public static var raw = {};
+    public static Listener[] list = [];
   } // === class STATE
+
+  class Listener {
+    public string target_id  = "unknown";
+    public string event_type = "unknown";
+    public string name       = "unknown";
+    public var func;
+
+    public Listener(target, string event_type, string name, func) {
+      this.target_id  = event_dom_id(target);
+      this.event_type = event_type;
+      this.name       = name;
+      this.func = func;
+    }
+
+    public string key() {
+      return [this.target_id, this.event_type, this.name].join(" ");
+    }
+
+    function target() {
+      return to_dom(this.target_id);
+    }
+  } // === class Listener
+
+  function to_dom(x) {
+    var target;
+    switch (x) {
+      case "*window":
+        target = window;
+        break;
+      case "*document":
+        target = document;
+        break;
+      default:
+        target = document.querySelector("#" + x);
+    }
+    return target;
+  }
+
+  void remove() {
+    Listener l;
+    while (FUNCS.list.length > 0) {
+      l = FUNCS.list.pop();
+      l.target().removeEventListener(l.event_type, l.func, false);
+    }
+  }
 
   void event_add_specs() {
     // Is the event added?
     var f = void (e) { e; };
-    add(document, "click", f);
-    should_eq(f, FUNCS.raw["*document"]["onclick"].pop());
+    add(document, "click", "temp", f);
+    should_eq(true, EVENT.already_added(new Listener(document, "click", "temp", f)));
 
     // Do the event run?
     THE_STAGE.reset('<span id="event_trigger_span">clickable</span>');
     int i = 0;
-    add("#event_trigger_span", "click", function (e) { i += 2;});
+    add("#event_trigger_span", "click", "temp", function (e) { i += 2;});
     trigger("#event_trigger_span", "click");
     trigger("#event_trigger_span", "click");
     should_eq(4, i);
   }
 
-  function create_handler(string id, string key) {
-    return(function (e) {
-      var list = (FUNCS.raw[id][key] || []);
-      var len  = list.length;
-      for (int i = 0; i < len; i++) {
-        list[i](e);
-      }
-    });
-  }
+  /* function create_handler(string id, string key) { */
+  /*   return(function (e) { */
+  /*     var list = (FUNCS.list[id][key] || []); */
+  /*     var len  = list.length; */
+  /*     for (int i = 0; i < len; i++) { */
+  /*       list[i](e); */
+  /*     } */
+  /*   }); */
+  /* } */
 
   string event_dom_id(x) {
     if (x === window) { return "*window"; }
@@ -55,49 +100,43 @@ module DA_STANDARD.EVENT {
     throw new Error("Unable to get a dom id for value.");
   }
 
-  void add(x, string e_type, f) {
+  bool already_added(Listener l) {
+    int len = FUNCS.list.length;
+    string key = l.key();
+    for (int i = 0; i < len; i++) {
+      if (FUNCS.list[i].key() === key)
+        return true;
+    }
+    return false;
+  }
+
+  bool add(x, string e_type, string func_name,  f) {
     string x_id = event_dom_id(x);
     string key = "on" + e_type;
+    Listener l = new Listener(x, e_type, func_name, f);
 
-    if (!FUNCS.raw[x_id])
-      FUNCS.raw[x_id] = {};
-
-    if (!FUNCS.raw[x_id][key])
-      FUNCS.raw[x_id][key] = [];
-
-    var target;
-    switch (x_id) {
-      case "*window":
-        target = window;
-        break;
-      case "*document":
-        target = document;
-        break;
-      default:
-        target = document.querySelector("#" + x_id);
+    if (already_added(l)) {
+      return false;
     }
+    Console.log("adding: " + l.key());
+    FUNCS.list.push(l);
 
-    FUNCS.raw[x_id][key].push(f);
-
-    if (FUNCS.raw[x_id][key].length > 1) {
-      return;
-    }
-
-    var h = create_handler(x_id, key);
+    var target = l.target();
 
     if (target.addEventListener) {
-      target.addEventListener(e_type, h, false);
+      target.addEventListener(e_type, f, false);
       // 'false' used for usedCapture (3rd argument)
       //   to remain compatible with aging browsers.
-      return;
+      return true;
     }
 
     // from: https://www.oneupweb.com/blog/2012-01-10-oneupweb-cross-browser-event-binding-without-jquery/
     if (target.attachEvent) {
-      target.attachEvent(key, function (e) { h.call(e.srcElement, e); });
-      return;
+      target.attachEvent(key, function (e) { f.call(e.srcElement, e); });
+      return true;
     }
 
+    return false;
   } // === void add
 
   void prevent_default(x) {
