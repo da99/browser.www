@@ -1,0 +1,50 @@
+
+external window, document;
+import DA_STANDARD.SPECS;
+import DA_STANDARD.DOM;
+import System.Console;
+
+module DA_STANDARD.EVENT {
+
+  class STATE {
+    public static var LISTS = {};
+  } // === class STATE
+
+  void event_add_specs() {
+    var f = void (e) { e; };
+    add(document, "click", f);
+    should_eq(f, STATE.LISTS["*document"]["onclick"].pop());
+  }
+
+  function create_handler(string key) {
+    return(function (e) {
+      var list = (STATE.LISTS[key] || []);
+      var len  = list.length;
+      for (int i = 0; i < len; i++) {
+        list[i](e);
+      }
+    });
+  }
+
+  string event_dom_id(x) {
+    if (x === window) { return "*window"; }
+    if (x === document) { return "*document"; }
+    return DOM.dom_id(x);
+  }
+
+  void add(x, string e_type, f) {
+    string x_id = event_dom_id(x);
+    string key = "on" + e_type;
+
+    if (!STATE.LISTS[x_id])
+      STATE.LISTS[x_id] = {};
+    if (!STATE.LISTS[x_id][key])
+      STATE.LISTS[x_id][key] = [];
+
+    if (!x[key])
+      x[key] = create_handler(key);
+
+    STATE.LISTS[x_id][key].push(f);
+  }
+
+} // === module DA_STANDARD.EVENT

@@ -3,6 +3,7 @@ external document, window;
 import DA_STANDARD.STRING;
 import DA_STANDARD.COMMON;
 import DA_STANDARD.SPECS;
+import System.Console;
 
 module DA_STANDARD.DOM {
 
@@ -27,6 +28,16 @@ module DA_STANDARD.DOM {
     }
 
   } // === class ID_STATE
+
+  string dom_id(x) {
+    NODE n = new NODE(x);
+    string current = n.attr("id");
+    if (current.length === 0) {
+      current = ID_STATE.new_id("ele_");
+      n.attr("id", current);
+    }
+    return current;
+  }
 
   void doc_node_specs() {
     THE_STAGE.reset('<div id="query_selector_id">hello</div>');
@@ -114,8 +125,17 @@ module DA_STANDARD.DOM {
     public var origin;
 
     public NODE(v) {
-      this.origin = v || (new document.createElement("div"));
+      if (typeof v === "object" && v.origin && v.is_node) {
+        this.origin = v.origin;
+      } else {
+        if (typeof v === "string") {
+          v = document.querySelector(v);
+        }
+        this.origin = v || (new document.createElement("div"));
+      }
     }
+
+    public bool is_node() { return true; }
 
     public string html() {
       return this.origin.innerHTML;
@@ -160,8 +180,22 @@ module DA_STANDARD.DOM {
       return true;
     }
 
+    // Special cases:
+    //   dom! - Gets or sets id
     public string attr(string raw_name) {
+      if (raw_name === "id!") {
+        string old = this.attr('id');
+
+        if (!is_empty(old))
+          return old;
+
+        var str = ID_STATE.new_id("ele_");
+        this.attr('id', str);
+        return str;
+      }
+
       string name = trim(raw_name);
+      Console.log(this.origin);
       return trim( this.origin.getAttribute(name) || "" );
     }
 
@@ -172,28 +206,9 @@ module DA_STANDARD.DOM {
       return this;
     }
 
-    // Returns id.
-    // Sets id of element if no id is set.
-    //
-    // .dom_id(raw_or_jquery)
-    public string dom_id() {
-      return this.dom_id("element_");
-    } // === id
-
-    // Returns id.
-    // Sets id of element if no id is set.
-    //
-    // .dom_id('prefix')
-    public string dom_id(string prefix) {
-      string old = this.attr('id');
-
-      if (!is_empty(old))
-        return old;
-
-      var str = ID_STATE.new_id(prefix);
-      this.attr('id', str);
-      return str;
-    } // === id
+    public NODE_LIST node_list(string q) {
+      return new NODE_LIST(this.origin.querySelectorAll(q));
+    }
 
   } // === class Element
 

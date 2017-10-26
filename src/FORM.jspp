@@ -16,7 +16,7 @@ module DA_STANDARD.FORM {
   }
 
   string to_json(string q) {
-    NODE_LIST inputs = DOC.node_list(q + " input");
+    NODE_LIST inputs = DOC.node(q).node_list("input, select, textarea");
     var o = {};
     int len = inputs.length();
     NODE current;

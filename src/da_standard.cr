@@ -32,7 +32,7 @@ class NODE_SPECS < SPECS
 
   def initialize
     @files = Dir.glob("src/*.jspp").reject { |s|
-      s =~ /\/(browser|FORM|DOM).jspp/
+      s =~ /\/(browser|FORM|DOM|EVENT).jspp/
     }
   end # === def initialize
 end # === class NODE_SPECS

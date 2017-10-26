@@ -87,17 +87,22 @@ module DA_STANDARD.SPECS
 
   void should_eq(expected, func_or_other) {
     var actual = undefined;
-    if (is_function(func_or_other)) {
-      actual = func_or_other();
-    } else {
+    if (is_function(expected) && is_function(func_or_other) && expected === func_or_other) {
       actual = func_or_other;
+    } else {
+      if (is_function(func_or_other)) {
+        actual = func_or_other();
+      } else {
+        actual = func_or_other;
+      }
     }
 
     if (
         (actual != expected) &&
         !(is_array(expected) && is_array(actual) && arrays_are_equal(expected, actual))
        ) {
-      failed(to_string(func_or_other), to_string(expected), to_string(actual));
+
+      return failed(to_string(func_or_other), to_string(expected), to_string(actual));
     }
 
     Console.log("Pass: " + to_string(expected) + " == " + to_string(func_or_other) );
