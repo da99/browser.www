@@ -17,9 +17,9 @@ module DA_STANDARD.EVENT {
     should_eq(f, STATE.LISTS["*document"]["onclick"].pop());
   }
 
-  function create_handler(string dom_id, string key) {
+  function create_handler(string id, string key) {
     return(function (e) {
-      var list = (STATE.LISTS[dom_id][key] || []);
+      var list = (STATE.LISTS[id][key] || []);
       var len  = list.length;
       for (int i = 0; i < len; i++) {
         list[i](e);
@@ -94,7 +94,7 @@ module DA_STANDARD.EVENT {
     var e;
     switch (e_type) {
       case "click":
-        e = new MouseEvent('click', {view: window, bubbles: true, cancelable: true});
+        e = new Event('click', {view: window, bubbles: true, cancelable: true});
         break;
       default:
         throw new Error("Unable to create event: " + e_type);

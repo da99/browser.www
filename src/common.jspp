@@ -1,7 +1,6 @@
 
 external NaN, TypeError, Error, process, require, window, arguments, Object, RegExp;
 
-/* process.stdout.write("."); */
 import DA_STANDARD.STRING;
 import DA_STANDARD.SPECS;
 import System.Console;
@@ -16,6 +15,25 @@ module DA_STANDARD.COMMON
         arr.push(x);
     }
     return arr;
+  }
+
+  void is_dev_specs() {
+    should_eq(true, is_dev());
+  }
+
+  bool is_dev() {
+    if (typeof process !== 'undefined' && process.env.IS_DEV) {
+      return true;
+    }
+
+    if (typeof window !== 'undefined') {
+      var addr = window.location.href;
+      return window.console && (addr.indexOf("localhost") > -1 ||
+          addr.indexOf("file:///") > -1 ||
+          addr.indexOf("127.0.0.1") > -1)
+        ;
+    }
+    return false;
   }
 
   bool is_positive(v) {

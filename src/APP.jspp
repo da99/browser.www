@@ -1,0 +1,41 @@
+
+external Error;
+import DA_STANDARD.SPECS;
+import DA_STANDARD.COMMON;
+
+module DA_STANDARD.APP {
+
+  class STATE {
+    public static var FUNCS = [];
+  } // === class STATE
+
+  void dev_reset() {
+    if (is_dev()) {
+      STATE.FUNCS = [];
+    } else {
+      throw new Error("Can't reset in a non-dev env.");
+    }
+  }
+
+  void push(f) {
+    STATE.FUNCS.push(f);
+  }
+
+  void app_send_specs() {
+    APP.dev_reset();
+    int i = 0;
+    APP.push(function () { i+=1; });
+    APP.send({a: "b"});
+    APP.send({a: "b"});
+    should_eq(2, i);
+  }
+
+  void send(msg) {
+    int len = STATE.FUNCS.length;
+
+    for (int i = 0; i < len; i++) {
+      STATE.FUNCS[i](msg);
+    }
+  }
+
+} // === module APP
