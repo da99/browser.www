@@ -5,9 +5,6 @@ import System.Console;
 module DA_STANDARD.STRING
 {
 
-  class STATE {
-  } // === class STATE
-
   void is_whitespace_specs() {
     should_eq(true, bool () { return is_whitespace("   "); });
     should_eq(false,bool () { return is_whitespace("");    });

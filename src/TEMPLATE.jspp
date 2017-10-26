@@ -13,11 +13,14 @@ import System;
 // ===   to the browser/client.
 module DA_STANDARD.TEMPLATE {
 
-  class STATE {
-    public static string[] allowed = [
+  class ALLOWED {
+    public static string[] chars = [
       escape_char('&'), escape_char('<'), escape_char('>')
     ];
-    public static RegExp replace_pattern = new RegExp( '(?:' + allowed.join('|') + ')', 'g');
+  }
+
+  class PATTERN {
+    public static RegExp replace = new RegExp( '(?:' + ALLOWED.chars.join('|') + ')', 'g');
   }
 
   void unescape_specs() {
@@ -54,7 +57,7 @@ module DA_STANDARD.TEMPLATE {
   }
 
   string unescape(string source) {
-    return source.replace(TEMPLATE.STATE.replace_pattern, unescape_string);
+    return source.replace(TEMPLATE.PATTERN.replace, unescape_string);
   }
 
   void template_render_specs() {

@@ -5,20 +5,20 @@ import DA_STANDARD.COMMON;
 
 module DA_STANDARD.APP {
 
-  class STATE {
-    public static var FUNCS = [];
-  } // === class STATE
+  class FUNCS {
+    public static var raw = [];
+  } // === class FUNCS
 
   void dev_reset() {
     if (is_dev()) {
-      STATE.FUNCS = [];
+      FUNCS.raw = [];
     } else {
       throw new Error("Can't reset in a non-dev env.");
     }
   }
 
   void push(f) {
-    STATE.FUNCS.push(f);
+    FUNCS.raw.push(f);
   }
 
   void app_send_specs() {
@@ -31,10 +31,10 @@ module DA_STANDARD.APP {
   }
 
   void send(msg) {
-    int len = STATE.FUNCS.length;
+    int len = FUNCS.raw.length;
 
     for (int i = 0; i < len; i++) {
-      STATE.FUNCS[i](msg);
+      FUNCS.raw[i](msg);
     }
   }
 

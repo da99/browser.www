@@ -131,10 +131,13 @@ module DA_STANDARD.DOM {
         this.origin = v.origin;
       } else {
         if (typeof v === "string") {
-          v = document.querySelector(v);
+          var e = document.querySelector(v);
+          if (!e) {
+            throw new Error("Unable to find element with selector: " + v);
+          }
         }
         if (!v) {
-          throw new Error("Unable to find element with selector: " + v);
+          throw new Error("Invalid object.");
         }
         this.origin = v;
       }
@@ -174,25 +177,27 @@ module DA_STANDARD.DOM {
       return false;
     }
 
-    public static NODE none() {
-      return(new NODE("no_element"));
-    }
-
-    public NODE closest(string raw) {
+    public NODE closest(string selector) {
+      var raw_node;
       if (this.origin.closest) {
-        return(new NODE(this.origin.closest(raw) || "no_element"));
+        raw_node = this.origin.closest(selector);
+        if (!raw_node) {
+          throw new Error("No closest node found for: " + selector);
+        }
+        return new NODE(raw_node);
       }
 
-      var el = this.origin.parentElement;
+      raw_node = this.origin.parentElement;
       NODE n;
 
-      while (el && el.tagName != "body") {
-        n = new NODE(el);
-        if (n.matches(raw))
+      while (raw_node && raw_node.tagName != "body") {
+        n = new NODE(raw_node);
+        if (n.matches(selector))
           return n;
-        el = n.origin.parentElement;
+        raw_node = n.origin.parentElement;
       }
-      return(new NODE("no_element"));
+
+      throw new Error("No closest node found for: " + selector);
     }
 
     public void remove() {

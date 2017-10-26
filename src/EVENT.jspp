@@ -7,15 +7,15 @@ import System.Console;
 
 module DA_STANDARD.EVENT {
 
-  class STATE {
-    public static var LISTS = {};
+  class FUNCS {
+    public static var raw = {};
   } // === class STATE
 
   void event_add_specs() {
     // Is the event added?
     var f = void (e) { e; };
     add(document, "click", f);
-    should_eq(f, STATE.LISTS["*document"]["onclick"].pop());
+    should_eq(f, FUNCS.raw["*document"]["onclick"].pop());
 
     // Do the event run?
     THE_STAGE.reset('<span id="event_trigger_span">clickable</span>');
@@ -28,7 +28,7 @@ module DA_STANDARD.EVENT {
 
   function create_handler(string id, string key) {
     return(function (e) {
-      var list = (STATE.LISTS[id][key] || []);
+      var list = (FUNCS.raw[id][key] || []);
       var len  = list.length;
       for (int i = 0; i < len; i++) {
         list[i](e);
@@ -59,11 +59,11 @@ module DA_STANDARD.EVENT {
     string x_id = event_dom_id(x);
     string key = "on" + e_type;
 
-    if (!STATE.LISTS[x_id])
-      STATE.LISTS[x_id] = {};
+    if (!FUNCS.raw[x_id])
+      FUNCS.raw[x_id] = {};
 
-    if (!STATE.LISTS[x_id][key])
-      STATE.LISTS[x_id][key] = [];
+    if (!FUNCS.raw[x_id][key])
+      FUNCS.raw[x_id][key] = [];
 
     var target;
     switch (x_id) {
@@ -77,9 +77,9 @@ module DA_STANDARD.EVENT {
         target = document.querySelector("#" + x_id);
     }
 
-    STATE.LISTS[x_id][key].push(f);
+    FUNCS.raw[x_id][key].push(f);
 
-    if (STATE.LISTS[x_id][key].length > 1) {
+    if (FUNCS.raw[x_id][key].length > 1) {
       return;
     }
 
@@ -99,5 +99,20 @@ module DA_STANDARD.EVENT {
     }
 
   } // === void add
+
+  void prevent_default(x) {
+    if (x.preventDefault) {
+      x.preventDefault();
+    }
+  }
+
+  void stop(x) {
+    string[] funcs = "stopPropagation,stopImmediatePropagation,preventDefault".split(",");
+    for (int i = 0; i < funcs.length; i++) {
+      if (x[funcs[i]]) {
+        x[funcs[i]]();
+      }
+    }
+  }
 
 } // === module DA_STANDARD.EVENT

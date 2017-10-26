@@ -1,5 +1,5 @@
 
-external Error, Event;
+external Error, Event, XMLHttpRequest, JSON;
 external setTimeout, window, document;
 
 import System.Console;
@@ -9,6 +9,11 @@ import DA_STANDARD.DOM;
 
 module DA_STANDARD.SPECS
 {
+
+  class STATE {
+    public static bool keep_checking = true; // === used by auto_reload
+    public static string modified_at = ""; // === used by auto_reload
+  }
 
   class THE_STAGE {
     public static void reset(string html) {
@@ -160,182 +165,33 @@ module DA_STANDARD.SPECS
     x.dispatchEvent(e);
   } // === void trigger
 
-  /* function spec_next(specs) { */
+  void auto_reload() {
+    if (!STATE.keep_checking)
+      return;
 
-  /* // Specification function: */
-  /* // Accepts: */
-  /* //   string : 'reset'  => Reset dom for next test. */
-  /* function spec_dom(cmd) { */
+    var xhr = new XMLHttpRequest();
 
-  /*   switch (cmd) { */
-  /*     case 'reset': */
-  /*       var stage = $('#Spec_Stage'); */
-  /*       if (stage.length === 0) */
-  /*         $('body').prepend('<div id="Spec_Stage"></div>'); */
-  /*       else */
-  /*         stage.empty(); */
-  /*       break; */
+    xhr.open("GET", "/do-reload");
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+      if (xhr.status !== 200)
+        return;
 
-  /*     default: */
-  /*       if (arguments.length !== 0) */
-  /*       throw new Error("Unknown value: " + to_string(arguments)); */
-  /*   } // === switch cmd */
+      string old = STATE.modified_at;
+      if (old === "") {
+        STATE.modified_at = xhr.response;
+        return;
+      }
 
-  /*   return $('#Spec_Stage'); */
-  /* } */
-
-  /* function spec_start() { */
-  /* // === Expect: */
-  /* // spec(my_func,             ["my args"],           "my expected value"); */
-  /* // spec("my expected value", function my_custom_spec() { */
-  /* //   return "a value"; */
-  /* // }); */
-  /* // */
-  /* // === Throws: */
-  /* // spec(my_func, ["my args"], new Error("my expected thrown error")); */
-  /* // spec( */
-  /* //   new Error("my expected thrown error"), */
-  /* //   function my_custom_spec() { */
-  /* //     throw new Error("something"); */
-  /* //   } */
-  /* // ); */
-  /* // */
-  /* // === Run specs: */
-  /* // spec('send message'); */
-  /* // spec(function (msg) { */
-  /* //  log('Finished specs: ' + msg.total); */
-  /* // }); */
-  /* // */
-  /* // === Used by other functions to continue running specs: */
-  /* // spec({ */
-  /* //    list: [], */
-  /* //    i:"init"|0|positive, */
-  /* //    on_finish: my_callback */
-  /* // }); */
-  /* // */
-
-
-  /* // === Is there a specific spec to run? */
-  /* (function () { */
-  /*   if (typeof window === 'undefined') */
-  /*     return; */
-  /*   var href = window.location.href; */
-  /*   var target = _.trim(href.split('?').pop() || ''); */
-  /*   if (!is_empty(target) && target !== href  && target !== function_to_name("str_or_func")) */
-  /*     return false; */
-
-  /*   // === Reset DOM: */
-  /*   spec_dom('reset'); */
-  /*   spec.target = target; */
-  /* })(); */
-  /* } */
-
-  /* function spec() { */
-
-  /*   var is_allowed = ( */
-  /*     ( typeof(window) !== 'undefined' && $('#Spec_Stage').length === 1) || */
-  /*       ( typeof(process) !== 'undefined' && process.argv[2] === 'test') */
-  /*   ); */
-
-  /*   if (!is_allowed) */
-  /*     return; */
-
-  /*   var args = _.toArray(arguments); */
-
-  /*   if (length(args) !== 1) { */
-  /*     return App('push into or create', 'specs', args); */
-  /*   } // === switch */
-
-  /*   if (args[0] !== 'run' && !is_function(args[0])) */
-  /*     throw new Error('Unknown value: ' + to_string(args[0])); */
-
-  /*   App('create or ignore', 'spec on finishs', []); */
-  /*   App('create or ignore', 'specs done', []); */
-  /*   var specs = App('read or create', 'specs', []); */
-  /*   var i     = App('read or create', 'spec.index', 0); */
-
-  /*   if (is_empty(specs)) */
-  /*     throw new Error('No specs found.'); */
-
-  /*   if (is_function(arguments[0])) */
-  /*     App('push into', 'spec on finishs', arguments[0]); */
-
-  /*   while (i < specs.length) { */
-  /*     if (run_spec(i, specs[i]) === 'wait') */
-  /*       return 'wait'; */
-  /*     i = App('read', 'spec.index'); */
-  /*   } */
-
-  /*   var passed = App('read', 'spec.index'); */
-  /*   if (specs.length < passed) */
-  /*     throw new Error("Total specs: " + specs.length + " != Passed specs: " + passed); */
-
-  /*   var on_fins = App('read', 'spec on finishs'); */
-  /*   if (is_empty(on_fins)) { */
-  /*     on_fins.push(spec.default_msg); */
-  /*   } */
-
-  /*   var msg = {total: specs.length}; */
-  /*   for (var func_i = 0; func_i < on_fins.length; func_i++) */
-  /*     on_fins[func_i](msg); */
-
-  /*   return 'finish'; */
-
-  /*   function actual_equals_expect(actual, expect) { */
-  /*     if (actual === expect) */
-  /*       return true; */
-
-  /*     if (is_string(actual) && is_regexp(expect) && actual.match(expect)) */
-  /*       return true; */
-
-  /*     if (actual && actual.constructor === Error && expect && expect.constructor && actual.message === expect.message) */
-  /*       return true; */
-
-  /*     if (actual && actual.constructor === Error && is_regexp(expect) && actual.message.match(expect)) */
-  /*       return true; */
-
-  /*     return false; */
-  /*   } */
-
-  /*   function run_spec(index, raw_spec) { */
-
-  /*     var f, args_, expect, actual; */
-
-  /*     if (raw_spec.length === 2 && is_function(raw_spec[1])) { */
-  /*         f      = raw_spec[1]; */
-  /*         args_  = (length(f) > 0) ? [compare_actual] : []; */
-  /*         expect = raw_spec[0]; */
-  /*     } else { */
-  /*       if (raw_spec.length === 3 && is_function(raw_spec[0])) { */
-  /*         f      = raw_spec[0]; */
-  /*         args_  = raw_spec[1]; */
-  /*         expect = raw_spec[2]; */
-  /*       } else { */
-  /*         throw new Error("Invalid spec: " + to_string(raw_spec)); */
-  /*       } */
-  /*     } */
-
-  /*     // === Handle async specs: */
-  /*     if (args_[0] === compare_actual) { */
-  /*       f.apply(null, args_); */
-  /*       wait_max(3, function () { */
-  /*         if (!_.includes(App('read', 'specs done'), index)) */
-  /*           return false; */
-  /*         spec('run'); */
-  /*         return true; */
-  /*       }); */
-  /*       return "wait"; */
-  /*     } // === if ======================= */
-
-  /*     try { */
-  /*       actual = f.apply(null, args_); */
-  /*     } catch (e) { */
-  /*       actual = e; */
-  /*     } */
-  /*     compare_actual(actual); */
-  /*     return true; */
-  /*     } // === compare_actual */
-  /*   } // === function regular_spec */
+      if (old !== xhr.response) {
+        STATE.keep_checking = true;
+        window.location.reload(true);
+      } else {
+        STATE.modified_at = xhr.response;
+      }
+    };
+    xhr.send(JSON.stringify("checking..."));
+  } // === void auto_reload
 
 
 } // === DA_STANDARD.SPECS
