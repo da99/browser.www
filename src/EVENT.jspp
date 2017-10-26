@@ -79,11 +79,25 @@ module DA_STANDARD.EVENT {
 
     STATE.LISTS[x_id][key].push(f);
 
-    if (STATE.LISTS[x_id][key].length === 1) {
+    if (STATE.LISTS[x_id][key].length > 1) {
+      return;
+    }
+
+    var h = create_handler(x_id, key);
+
+    if (target.addEventListener) {
+      target.addEventListener(e_type, h, false);
       // 'false' used for usedCapture (3rd argument)
       //   to remain compatible with aging browsers.
-      target.addEventListener(e_type, create_handler(x_id, key), false);
+      return;
     }
+
+    // from: https://www.oneupweb.com/blog/2012-01-10-oneupweb-cross-browser-event-binding-without-jquery/
+    if (target.attachEvent) {
+      target.attachEvent(key, function (e) { h.call(e.srcElement, e); });
+      return;
+    }
+
   } // === void add
 
 } // === module DA_STANDARD.EVENT
