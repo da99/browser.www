@@ -14,18 +14,16 @@ module DA_STANDARD.EVENT {
   class Listener {
     public string target_id  = "unknown";
     public string event_type = "unknown";
-    public string name       = "unknown";
     public var func;
 
-    public Listener(target, string event_type, string name, func) {
+    public Listener(target, string event_type, func) {
       this.target_id  = event_dom_id(target);
       this.event_type = event_type;
-      this.name       = name;
       this.func = func;
     }
 
     public string key() {
-      return [this.target_id, this.event_type, this.name].join(" ");
+      return [this.target_id, this.event_type].join(" ");
     }
 
     function target() {
@@ -59,27 +57,17 @@ module DA_STANDARD.EVENT {
   void event_add_specs() {
     // Is the event added?
     var f = void (e) { e; };
-    add(document, "click", "temp", f);
-    should_eq(true, EVENT.already_added(new Listener(document, "click", "temp", f)));
+    add(document, "click", f);
+    should_eq(true, EVENT.already_added(new Listener(document, "click", f)));
 
     // Do the event run?
     THE_STAGE.reset('<span id="event_trigger_span">clickable</span>');
     int i = 0;
-    add("#event_trigger_span", "click", "temp", function (e) { i += 2;});
+    add("#event_trigger_span", "click", function (e) { i += 2;});
     trigger("#event_trigger_span", "click");
     trigger("#event_trigger_span", "click");
     should_eq(4, i);
   }
-
-  /* function create_handler(string id, string key) { */
-  /*   return(function (e) { */
-  /*     var list = (FUNCS.list[id][key] || []); */
-  /*     var len  = list.length; */
-  /*     for (int i = 0; i < len; i++) { */
-  /*       list[i](e); */
-  /*     } */
-  /*   }); */
-  /* } */
 
   string event_dom_id(x) {
     if (x === window) { return "*window"; }
@@ -110,9 +98,9 @@ module DA_STANDARD.EVENT {
     return false;
   }
 
-  bool add(x, string e_type, string func_name,  f) {
+  bool add(x, string e_type,  f) {
     string x_id = event_dom_id(x);
-    Listener l = new Listener(x, e_type, func_name, f);
+    Listener l = new Listener(x, e_type, f);
 
     if (already_added(l)) {
       return false;
