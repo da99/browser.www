@@ -125,31 +125,28 @@ module DA_STANDARD.DOM {
   class NODE {
 
     public var origin;
+    public bool is_node = true;
 
     public NODE(v) {
-      if (typeof v === "object" && typeof v.origin === "object") {
+      if (typeof v === "object" && v.is_node) {
         this.origin = v.origin;
+        return;
+      }
+
+      if (typeof v === "object" && v.getAttribute) {
+        this.origin = v;
         return;
       }
 
       if (typeof v === "string") {
         var e = document.querySelector(v);
-        if (!e) {
-          throw new Error("Unable to find element with selector: " + v);
-        }
+        if (!e) { throw new Error("Unable to find element with selector: " + v); }
         this.origin = e;
-        return;
-      }
-
-      if (typeof v === "object") {
-        this.origin = v;
         return;
       }
 
       throw new Error("Invalid origin for NODE: " + to_string(v));
     } // === constructor
-
-    public bool is_node() { return true; }
 
     public static bool exists(string v) {
       if (document.querySelector(v))
