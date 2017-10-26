@@ -21,7 +21,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
     export CONTROLLER_PID=$$
     local +x CMD="da_standard.jspp specs run $@"
     ${=CMD} || sh_color RED "=== {{FAILED}}: BOLD{{$?}}"
-    process watch "-r sh -r bin -r src -r specs" $CMD
+    process watch "-r scratch -r sh -r bin -r src -r specs" $CMD
     ;;
 
   "run "*)
@@ -79,6 +79,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
     ;;
 
   run)
+    export IS_DEV="yes"
     CHANGED_FILE="${CHANGED_FILE:-}"
     reset
     if [[ "$CHANGED_FILE" == *"da_standard.cr" || "$CHANGED_FILE" == *".ecr" ]]; then
@@ -96,6 +97,8 @@ case "$(echo $ACTION $@ | xargs echo)" in
     tmp/da_standard write_specs
     my_jspp __ ${=FILES} "tmp/out/node.jspp" -o tmp/node.js
     my_jspp __ ${=FILES} "tmp/out/browser.jspp" -o tmp/browser.js
+
+    my_jspp __ ${=FILES} "scratch/scratch.jspp" -o tmp/scratch.js
 
     sh_color ORANGE "=== {{Running}} on node..."
     node tmp/node.js

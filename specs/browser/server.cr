@@ -18,8 +18,9 @@ end # === def pass_fail_color
 
 class Router
 
-  @@static_file = HTTP::StaticFileHandler.new("specs/browser", false)
-  @@tmp_file = HTTP::StaticFileHandler.new("tmp", false)
+  @@scratch_file = HTTP::StaticFileHandler.new("scratch/", false)
+  @@static_file  = HTTP::StaticFileHandler.new("specs/browser", false)
+  @@tmp_file     = HTTP::StaticFileHandler.new("tmp", false)
 
   include DA_ROUTER
 
@@ -68,8 +69,15 @@ class Router
     @@static_file.call(ctx)
   end
 
-  get("/favicon.ico") { @@static_file.call(ctx) }
-  get("/css/:name") { @@static_file.call(ctx) }
+  get("/scratch") do
+    ctx.request.path = "/index.html"
+    @@scratch_file.call(ctx)
+  end
+
+  get("/scratch.js") { @@tmp_file.call(ctx) }
+
+  get("/favicon.ico") { @@scratch_file.call(ctx) }
+  get("/css/:name") { |name| @@scratch_file.call(ctx) }
 
   get("/browser.js") {
     @@tmp_file.call(ctx)

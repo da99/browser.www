@@ -1,5 +1,6 @@
 
 external Error, Object;
+import DA_STANDARD.SPECS;
 
 module DA_STANDARD.OBJECT {
 
@@ -10,6 +11,21 @@ module DA_STANDARD.OBJECT {
       o = Object.assign(o, args[i]);
     }
     return o;
+  }
+
+  void x_inside_y_specs() {
+    should_eq(true, x_inside_y({a: "b"}, {a: "b"}));
+    should_eq(true, x_inside_y({a: "b"}, {a: "b", c: "d"}));
+    should_eq(false, x_inside_y({a: "d"}, {a: "b", c: "d"}));
+    should_eq(true, x_inside_y({}, {a: "b", c: "d"}));
+  }
+
+  bool x_inside_y(x, y) {
+    for(string k in x) {
+      if (!y.hasOwnProperty(k) || y[k] != x[k])
+        return false;
+    }
+    return true;
   }
 
 } // === module DA_STANDARD.OBJECT

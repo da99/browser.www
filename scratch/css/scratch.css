@@ -1,0 +1,32 @@
+
+body {
+  background-color: #9D9D93;
+}
+
+div {
+  padding: 20px;
+  margin: 10px;
+  background-color: #F8EDD1;
+  width: 30%;
+  float: left;
+}
+
+div.failed {
+  background-color: #CF2D38;
+  color: #FFF;
+  font-weight: bold;
+}
+
+span.failed {
+  color: red;
+}
+
+div.passed {
+  background-color: #94B053;
+  color: #FFF;
+  font-weight: bold;
+}
+
+span.passed {
+  color: green;
+}
