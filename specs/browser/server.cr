@@ -77,6 +77,7 @@ class Router
   get("/scratch.js") { @@tmp_file.call(ctx) }
 
   get("/favicon.ico") { @@scratch_file.call(ctx) }
+  get("/loader.gif") { @@scratch_file.call(ctx) }
   get("/css/:name") { |name| @@scratch_file.call(ctx) }
 
   get("/browser.js") {

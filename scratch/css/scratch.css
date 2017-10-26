@@ -3,6 +3,25 @@ body {
   background-color: #9D9D93;
 }
 
+form {
+  width: 30%;
+  float: left;
+  margin: 10px;
+  padding: 10px;
+  border: 1px solid green;
+}
+
+form.loading {
+  border: 1px dashed red;
+  background-image: url('/loader.gif');
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+form.loading button {
+  display: none;
+}
+
 div {
   padding: 20px;
   margin: 10px;

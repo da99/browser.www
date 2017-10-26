@@ -5,36 +5,61 @@ import DA_STANDARD.COMMON;
 
 module DA_STANDARD.APP {
 
-  class FUNCS {
-    public static var raw = [];
-  } // === class FUNCS
+  class Handler {
+    public static var list = [];
+
+    public var func;
+
+    public Handler(f) {
+      this.func = f;
+    }
+  } // === class Handler
+
+  class Msg {
+    public string name = "unknown";
+    public var data;
+
+    public Msg(string name, data) {
+      this.name = name;
+      this.data = data;
+    }
+
+    public bool is_event() {
+      if (this.data.hasOwnProperty("event")) {
+        if (typeof this.data.event === "object") {
+          return true;
+        }
+      }
+      return false;
+    } // === is_event
+  } // === class MSG
 
   void dev_reset() {
     if (is_dev()) {
-      FUNCS.raw = [];
+      Handler.list = [];
     } else {
       throw new Error("Can't reset in a non-dev env.");
     }
   }
 
   void push(f) {
-    FUNCS.raw.push(f);
+    Handler.list.push(f);
   }
 
   void app_send_specs() {
     APP.dev_reset();
     int i = 0;
-    APP.push(function () { i+=1; });
-    APP.send({a: "b"});
-    APP.send({a: "b"});
+    APP.push(function (name, m) { i+=1; });
+    APP.send("random", {a: "b"});
+    APP.send("random", {a: "b"});
     should_eq(2, i);
   }
 
-  void send(msg) {
-    int len = FUNCS.raw.length;
+  void send(string name, data) {
+    int len = Handler.list.length;
 
     for (int i = 0; i < len; i++) {
-      FUNCS.raw[i](msg);
+      Handler.list[i](name, data);
     }
   }
 

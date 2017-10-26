@@ -127,7 +127,7 @@ module DA_STANDARD.DOM {
     public var origin;
 
     public NODE(v) {
-      if (typeof v === "object" && v.origin && v.is_node) {
+      if (typeof v === "object" && typeof v.origin === "object") {
         this.origin = v.origin;
         return;
       }
