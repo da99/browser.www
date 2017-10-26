@@ -1,10 +1,20 @@
 
-external Error, setTimeout, window;
+external Error, Event;
+external setTimeout, window, document;
+
 import System.Console;
 import DA_STANDARD.COMMON;
+import DA_STANDARD.EVENT;
+import DA_STANDARD.DOM;
 
 module DA_STANDARD.SPECS
 {
+
+  class THE_STAGE {
+    public static void reset(string html) {
+      window.document.querySelector("#THE_STAGE").innerHTML = html;
+    }
+  } // === class THE_STAGE
 
   class THE_SPECS {
     public static var fail_list = [];
@@ -139,78 +149,18 @@ module DA_STANDARD.SPECS
     Console.log("Pass: " + f + "(" + args + ")");
   }
 
-  class THE_STAGE {
-    public static void reset(string html) {
-      window.document.querySelector("#THE_STAGE").innerHTML = html;
-    }
-  } // === class THE_STAGE
+  // This is not yet compatible with browsers like MSIE 10+.
+  void trigger(x, string e_type) {
+    var e = new Event(e_type, {view: window, bubbles: true, cancelable: true});
+
+    if (x === "*document" || x === document) { x = document; }
+    if (x === "*window" || x === window) { x = window; }
+    if (typeof x === "string") { x = (new NODE(x)).origin; }
+
+    x.dispatchEvent(e);
+  } // === void trigger
 
   /* function spec_next(specs) { */
-
-  /*   function to_string(v) { */
-  /*     return "" + v; */
-  /*   } */
-
-  /*   be(is_specs, specs); */
-
-  /*   if (specs.i === 'init') { */
-  /*       specs.i = 0; */
-  /*   } else { */
-  /*     if (specs.dones[specs.i] !== true) */
-  /*       throw new Error("Spec did not finish: " + to_string(specs.list[specs.i])); */
-  /*     specs.i = specs.i + 1; */
-  /*   } */
-
-  /*   var i    = specs.i; */
-  /*   var list = specs.list; */
-  /*   var func = list[i]; */
-
-  /*   // === Are all specs finished? */
-  /*   if (!func && i >= length(specs.list)) { */
-  /*     specs.total = i; */
-  /*     if (specs.total !== specs.list.length) */
-  /*       throw new Error('Not all specs finished: ' + to_string(specs.total) + ' !== ' + to_string(specs.list.length)); */
-  /*     specs.on_finish(specs); */
-  /*     return length(specs.list); */
-  /*   } */
-
-  /*   // === Function was found? */
-  /*   if (!func) { */
-  /*     throw new Error('Spec not found: ' + to_string(i)); */
-  /*   } */
-
-  /*   // === Async? */
-  /*   if (length(func) === 1 ) { */
-  /*     setTimeout(function () { */
-  /*       if (!specs.dones[i]) */
-  /*         throw new Error("Spec did not finish in time: " + to_string(func)); */
-  /*     }, 2500); */
-  /*     func(function () { */
-  /*       specs.dones[i] = true; */
-  /*       spec_next(specs); */
-  /*     }); */
-  /*     return false; */
-  /*   } */
-
-  /*   // === Regular spec, non-asyc? */
-  /*   if (length(func) === 0) { */
-  /*     func(); */
-  /*     specs.dones[i] = true; */
-  /*     return spec_next(specs); */
-  /*   } */
-
-  /*   throw new Error('Function has invalid arguments: ' + to_string(func)); */
-  /* } */
-
-  /* void is_specs(specs) { */
-  /*   var is_valid_specs_i = or(is('init'), is(0), is_positive); */
-
-  /*   be(is_plain_object,  specs); */
-  /*   be(not(is_empty),    specs.list); */
-  /*   be(is_valid_specs_i, specs.i); */
-  /*   be(is_plain_object,  specs.dones); */
-  /*   return true; */
-  /* } */
 
   /* // Specification function: */
   /* // Accepts: */
@@ -384,31 +334,6 @@ module DA_STANDARD.SPECS
   /*     } */
   /*     compare_actual(actual); */
   /*     return true; */
-
-  /*     function compare_actual(actual_) { */
-
-  /*       var sig = to_function_string(f, args); */
-  /*       var msg_ = ""; */
-  /*       if (actual_ === expect) */
-  /*         msg_ = to_string(actual_) + ' === ' + to_string(expect); */
-  /*       else */
-  /*         msg_ = to_string(actual_) + ' !== ' + to_string(expect); */
-
-  /*       if (!actual_equals_expect(actual_, expect)) { */
-
-  /*         if (is_error(actual_)) { */
-  /*           console.error("!!! Failed w/ unexpected error: " + sig); */
-  /*           throw actual_; */
-  /*         } */
-
-  /*         log(f, args, expect, actual_); */
-  /*         throw new Error("!!! Failed: " + sig + ' -> ' + msg_ ); */
-  /*       } */
-
-  /*       log('=== Passed: ' + sig + ' -> ' + msg_); */
-
-  /*       App('+1', 'spec.index'); */
-  /*       App('push into', 'specs done', index); */
   /*     } // === compare_actual */
   /*   } // === function regular_spec */
 

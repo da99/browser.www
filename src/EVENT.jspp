@@ -12,9 +12,18 @@ module DA_STANDARD.EVENT {
   } // === class STATE
 
   void event_add_specs() {
+    // Is the event added?
     var f = void (e) { e; };
     add(document, "click", f);
     should_eq(f, STATE.LISTS["*document"]["onclick"].pop());
+
+    // Do the event run?
+    THE_STAGE.reset('<span id="event_trigger_span">clickable</span>');
+    int i = 0;
+    add("#event_trigger_span", "click", function (e) { i += 2;});
+    trigger("#event_trigger_span", "click");
+    trigger("#event_trigger_span", "click");
+    should_eq(4, i);
   }
 
   function create_handler(string id, string key) {
@@ -52,6 +61,7 @@ module DA_STANDARD.EVENT {
 
     if (!STATE.LISTS[x_id])
       STATE.LISTS[x_id] = {};
+
     if (!STATE.LISTS[x_id][key])
       STATE.LISTS[x_id][key] = [];
 
@@ -69,47 +79,11 @@ module DA_STANDARD.EVENT {
 
     STATE.LISTS[x_id][key].push(f);
 
-    var handler = create_handler(x_id, key);
-
     if (STATE.LISTS[x_id][key].length === 1) {
-      if (target.addEventListener) {
-        target.addEventListener(e_type, handler);
-      } else {
-        target[key] = handler;
-      }
+      // 'false' used for usedCapture (3rd argument)
+      //   to remain compatible with aging browsers.
+      target.addEventListener(e_type, create_handler(x_id, key), false);
     }
-  }
-
-  void event_trigger_specs() {
-    THE_STAGE.reset('<span id="event_trigger_span">clickable</span>');
-    int i = 0;
-    add("#event_trigger_span", "click", function (e) { i += 2;});
-    trigger("#event_trigger_span", "click");
-    trigger("#event_trigger_span", "click");
-    should_eq(4, i);
-  }
-
-  void trigger(x, string e_type) {
-    string id = event_dom_id(x);
-    var e;
-    switch (e_type) {
-      case "click":
-        e = new Event('click', {view: window, bubbles: true, cancelable: true});
-        break;
-      default:
-        throw new Error("Unable to create event: " + e_type);
-    } // switch e_type
-
-    switch (id) {
-      case "*document":
-        document.dispatchEvent(e);
-        break;
-      case "*window":
-        window.dispatchEvent(e);
-        break;
-      default:
-        (new NODE("#" + id)).origin.dispatchEvent(e);
-    }
-  }
+  } // === void add
 
 } // === module DA_STANDARD.EVENT
