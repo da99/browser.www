@@ -21,8 +21,7 @@ module DA_STANDARD.SPECS
         count += 1;
         if (count >= max) {
           THE_SPECS.wait_count -= 1;
-          failed("Gave up waiting for test: " + COMMON.to_string(cond), true, cond());
-          return;
+          return failed("Gave up waiting for test: " + COMMON.to_string(cond), true, cond());
         }
 
         if (cond() === true) {
@@ -53,7 +52,7 @@ module DA_STANDARD.SPECS
     }
 
     public static void run(void() passed, void() they_failed) {
-      while (THE_SPECS.spec_list.length > 0 && THE_SPECS.wait_count == 0) {
+      while (THE_SPECS.fail_list.length === 0 && THE_SPECS.spec_list.length > 0 && THE_SPECS.wait_count == 0) {
         var pair = THE_SPECS.spec_list.shift();
         Console.log("=== " + pair[0] + " ===");
         pair[1]();
@@ -126,7 +125,7 @@ module DA_STANDARD.SPECS
     }
 
     if (actual != expected) {
-      failed(to_string(func) + " args: " + to_string(args), to_string(expected), to_string(actual));
+      return failed(to_string(func) + " args: " + to_string(args), to_string(expected), to_string(actual));
     }
 
     Console.log("Pass: " + to_string(expected) + " == " + func.name + to_string(args));
@@ -135,7 +134,7 @@ module DA_STANDARD.SPECS
   void spec(f, args, expected) {
     var actual = f.apply(args);
     if (actual != expected) {
-      failed(f + "(" + args + ")", expected, actual);
+      return failed(f + "(" + args + ")", expected, actual);
     }
     Console.log("Pass: " + f + "(" + args + ")");
   }

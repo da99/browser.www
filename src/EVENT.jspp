@@ -1,7 +1,8 @@
 
-external window, document;
+external window, document, Event, Error, MouseEvent;
 import DA_STANDARD.SPECS;
 import DA_STANDARD.DOM;
+import DA_STANDARD.COMMON;
 import System.Console;
 
 module DA_STANDARD.EVENT {
@@ -16,9 +17,9 @@ module DA_STANDARD.EVENT {
     should_eq(f, STATE.LISTS["*document"]["onclick"].pop());
   }
 
-  function create_handler(string key) {
+  function create_handler(string dom_id, string key) {
     return(function (e) {
-      var list = (STATE.LISTS[key] || []);
+      var list = (STATE.LISTS[dom_id][key] || []);
       var len  = list.length;
       for (int i = 0; i < len; i++) {
         list[i](e);
@@ -29,7 +30,20 @@ module DA_STANDARD.EVENT {
   string event_dom_id(x) {
     if (x === window) { return "*window"; }
     if (x === document) { return "*document"; }
-    return DOM.dom_id(x);
+
+    if (typeof x === "object" && x.origin) {
+      return x.attr("id!");
+    }
+
+    if (is_string(x)) {
+      return((new NODE(x)).attr("id!"));
+    }
+
+    if (typeof x === "object") {
+      return DOM.dom_id(x);
+    }
+
+    throw new Error("Unable to get a dom id for value.");
   }
 
   void add(x, string e_type, f) {
@@ -41,10 +55,61 @@ module DA_STANDARD.EVENT {
     if (!STATE.LISTS[x_id][key])
       STATE.LISTS[x_id][key] = [];
 
-    if (!x[key])
-      x[key] = create_handler(key);
+    var target;
+    switch (x_id) {
+      case "*window":
+        target = window;
+        break;
+      case "*document":
+        target = document;
+        break;
+      default:
+        target = document.querySelector("#" + x_id);
+    }
 
     STATE.LISTS[x_id][key].push(f);
+
+    var handler = create_handler(x_id, key);
+
+    if (STATE.LISTS[x_id][key].length === 1) {
+      if (target.addEventListener) {
+        target.addEventListener(e_type, handler);
+      } else {
+        target[key] = handler;
+      }
+    }
+  }
+
+  void event_trigger_specs() {
+    THE_STAGE.reset('<span id="event_trigger_span">clickable</span>');
+    int i = 0;
+    add("#event_trigger_span", "click", function (e) { i += 2;});
+    trigger("#event_trigger_span", "click");
+    trigger("#event_trigger_span", "click");
+    should_eq(4, i);
+  }
+
+  void trigger(x, string e_type) {
+    string id = event_dom_id(x);
+    var e;
+    switch (e_type) {
+      case "click":
+        e = new MouseEvent('click', {view: window, bubbles: true, cancelable: true});
+        break;
+      default:
+        throw new Error("Unable to create event: " + e_type);
+    } // switch e_type
+
+    switch (id) {
+      case "*document":
+        document.dispatchEvent(e);
+        break;
+      case "*window":
+        window.dispatchEvent(e);
+        break;
+      default:
+        (new NODE("#" + id)).origin.dispatchEvent(e);
+    }
   }
 
 } // === module DA_STANDARD.EVENT

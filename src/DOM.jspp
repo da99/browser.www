@@ -43,6 +43,7 @@ module DA_STANDARD.DOM {
     THE_STAGE.reset('<div id="query_selector_id">hello</div>');
     should_eq("hello", DOC.node("#query_selector_id").html());
   }
+
   void doc_node_list_specs() {
     THE_STAGE.reset('<div class="node_list">hello</div><div class="node_list">hello 2</div>');
     should_eq(2, DOC.node_list("div.node_list").length());
@@ -131,7 +132,7 @@ module DA_STANDARD.DOM {
         if (typeof v === "string") {
           v = document.querySelector(v);
         }
-        this.origin = v || (new document.createElement("div"));
+        this.origin = v || (document.createElement("div"));
       }
     }
 
