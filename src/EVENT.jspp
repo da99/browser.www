@@ -55,12 +55,6 @@ module DA_STANDARD.EVENT {
   }
 
   void event_add_specs() {
-    // Is the event added?
-    var f = void (e) { e; };
-    add(document, "click", f);
-    should_eq(true, EVENT.already_added(new Listener(document, "click", f)));
-
-    // Do the event run?
     THE_STAGE.reset('<span id="event_trigger_span">clickable</span>');
     int i = 0;
     add("#event_trigger_span", "click", function (e) { i += 2;});
@@ -102,9 +96,6 @@ module DA_STANDARD.EVENT {
     string x_id = event_dom_id(x);
     Listener l = new Listener(x, e_type, f);
 
-    if (already_added(l)) {
-      return false;
-    }
     FUNCS.list.push(l);
 
     var target = l.target();
