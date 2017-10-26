@@ -82,11 +82,24 @@ module DA_STANDARD.EVENT {
     throw new Error("Unable to get a dom id for value.");
   }
 
+  void event_already_added_specs() {
+    THE_STAGE.reset('<span id="event_already_added">clickable</span>');
+    int i = 0;
+    var f = function (e) { i += 2;};
+    add("#event_already_added", "click", f);
+    should_eq(
+      true,
+      EVENT.already_added(new Listener("#event_already_added", "click", f))
+    );
+  }
+
   bool already_added(Listener l) {
     int len = FUNCS.list.length;
     string key = l.key();
+    Listener current;
     for (int i = 0; i < len; i++) {
-      if (FUNCS.list[i].key() === key)
+      current = FUNCS.list[i];
+      if (current.key() === key && current.func === l.func)
         return true;
     }
     return false;
