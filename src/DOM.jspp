@@ -1,5 +1,6 @@
 
-external document, window;
+external document, window, Error;
+
 import DA_STANDARD.STRING;
 import DA_STANDARD.COMMON;
 import DA_STANDARD.SPECS;
@@ -132,11 +133,20 @@ module DA_STANDARD.DOM {
         if (typeof v === "string") {
           v = document.querySelector(v);
         }
-        this.origin = v || (document.createElement("div"));
+        if (!v) {
+          throw new Error("Unable to find element with selector: " + v);
+        }
+        this.origin = v;
       }
     }
 
     public bool is_node() { return true; }
+
+    public static bool exists(string v) {
+      if (document.querySelector(v))
+        return true;
+      return false;
+    }
 
     public string html() {
       return this.origin.innerHTML;
@@ -154,6 +164,45 @@ module DA_STANDARD.DOM {
       this.origin.style.display = "";
       return this;
     }
+
+    public bool matches(string raw) {
+      string[] names = "matches,matchesSelector,msMatchesSelector,webkitMatchesSelector".split(",");
+      for (int i=0; i<names.length; i++) {
+        if (this.origin[names[i]])
+          return(this.origin[names[i]](raw));
+      }
+      return false;
+    }
+
+    public static NODE none() {
+      return(new NODE("no_element"));
+    }
+
+    public NODE closest(string raw) {
+      if (this.origin.closest) {
+        return(new NODE(this.origin.closest(raw) || "no_element"));
+      }
+
+      var el = this.origin.parentElement;
+      NODE n;
+
+      while (el && el.tagName != "body") {
+        n = new NODE(el);
+        if (n.matches(raw))
+          return n;
+        el = n.origin.parentElement;
+      }
+      return(new NODE("no_element"));
+    }
+
+    public void remove() {
+      if (this.origin.removeNode) {
+        this.origin.removeNode();
+        return;
+      }
+      this.origin.remove();
+    }
+
 
     public NODE hide() {
       this.origin.style.display = "none";
