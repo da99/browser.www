@@ -112,13 +112,11 @@ module DA_STANDARD.EVENT {
 
   bool add(x, string e_type, string func_name,  f) {
     string x_id = event_dom_id(x);
-    string key = "on" + e_type;
     Listener l = new Listener(x, e_type, func_name, f);
 
     if (already_added(l)) {
       return false;
     }
-    Console.log("adding: " + l.key());
     FUNCS.list.push(l);
 
     var target = l.target();
@@ -132,7 +130,7 @@ module DA_STANDARD.EVENT {
 
     // from: https://www.oneupweb.com/blog/2012-01-10-oneupweb-cross-browser-event-binding-without-jquery/
     if (target.attachEvent) {
-      target.attachEvent(key, function (e) { f.call(e.srcElement, e); });
+      target.attachEvent("on" + e_type, function (e) { f.call(e.srcElement, e); });
       return true;
     }
 

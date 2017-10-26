@@ -129,19 +129,25 @@ module DA_STANDARD.DOM {
     public NODE(v) {
       if (typeof v === "object" && v.origin && v.is_node) {
         this.origin = v.origin;
-      } else {
-        if (typeof v === "string") {
-          var e = document.querySelector(v);
-          if (!e) {
-            throw new Error("Unable to find element with selector: " + v);
-          }
-        }
-        if (!v) {
-          throw new Error("Invalid object.");
-        }
-        this.origin = v;
+        return;
       }
-    }
+
+      if (typeof v === "string") {
+        var e = document.querySelector(v);
+        if (!e) {
+          throw new Error("Unable to find element with selector: " + v);
+        }
+        this.origin = e;
+        return;
+      }
+
+      if (typeof v === "object") {
+        this.origin = v;
+        return;
+      }
+
+      throw new Error("Invalid origin for NODE: " + to_string(v));
+    } // === constructor
 
     public bool is_node() { return true; }
 
@@ -208,7 +214,6 @@ module DA_STANDARD.DOM {
       this.origin.remove();
     }
 
-
     public NODE hide() {
       this.origin.style.display = "none";
       return this;
@@ -250,7 +255,6 @@ module DA_STANDARD.DOM {
       }
 
       string name = trim(raw_name);
-      Console.log(this.origin);
       return trim( this.origin.getAttribute(name) || "" );
     }
 
