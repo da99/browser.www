@@ -1,6 +1,0 @@
-
-external Error;
-
-module DA_STANDARD.FUNCTIONAL {
-} // === module DA_STANDARD.FUNCTIONAL
-
