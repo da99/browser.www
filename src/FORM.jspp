@@ -8,11 +8,21 @@ import DA_STANDARD.DOM;
 module DA_STANDARD.FORM {
 
   void form_to_json_specs() {
+    // It works:
     THE_STAGE.reset('<form id="form_main"><input type="hidden" name="first" value="1"><input type="hidden" name="second" value="2"></form>');
-    should_eq('{"__first":"1","__second":"2"}', FORM.to_json("#form_main"));
+    should_eq('{"first":"1","second":"2"}', FORM.to_json("#form_main"));
 
+    // Combines array keys:
     THE_STAGE.reset('<form id="form_main"><input type="hidden" name="names[]" value="Ted"><input type="hidden" name="names[]" value="Danson"></form>');
-    should_eq('{"__names":["Ted","Danson"]}', FORM.to_json("#form_main"));
+    should_eq('{"names":["Ted","Danson"]}', FORM.to_json("#form_main"));
+
+    // Prefixes special keys with: __
+    THE_STAGE.reset('<form id="form_main"><input type="hidden" name="hasOwnProperty" value="Ted"><input type="hidden" name="last_name" value="Danson"></form>');
+    should_eq('{"__hasOwnProperty":"Ted","last_name":"Danson"}', FORM.to_json("#form_main"));
+
+    // Prefixes array keys that are special with: __
+    THE_STAGE.reset('<form id="form_main"><input type="hidden" name="hasOwnProperty[]" value="Ted"><input type="hidden" name="hasOwnProperty[]" value="Danson"></form>');
+    should_eq('{"__hasOwnProperty":["Ted","Danson"]}', FORM.to_json("#form_main"));
   }
 
   string to_json(string q) {
@@ -22,15 +32,32 @@ module DA_STANDARD.FORM {
     NODE current;
     for (int i = 0; i < len; i++) {
       current = inputs.item(i);
-      string name = "__" + current.attr("name");
-      string val  = current.attr("value");
-      if (name.indexOf("[]") > 0) {
-        name = name.replace("[]", "");
+
+      string name = current.attr("name");
+
+      bool is_array_key = name.indexOf("[]") > 0;
+      if (is_array_key) {
+        name = name.replace(/[\[\]]/g, "");
+      }
+
+      bool is_special_key = (typeof o[name] !== "undefined");
+
+      if (is_special_key && is_array_key && o.hasOwnProperty(name)) {
+        is_special_key = false;
+      }
+
+      if (is_special_key) {
+        name = "__" + name;
+      }
+
+      string val  = trim(current.attr("value"));
+
+      if (!is_array_key) {
+        o[name] = val;
+      } else {
         if (!o.hasOwnProperty(name))
           o[name] = [];
         o[name].push(val);
-      } else {
-        o[name] = trim(val);
       }
     }
     return JSON.stringify(o);
