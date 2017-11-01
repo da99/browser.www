@@ -48,7 +48,7 @@ watch () {
 
   local BROWSER_ERROR="tmp/catch.browser.js.txt"
   # for FILE in $(git ls-files --cached --others --exclude-standard | grep --extended-regexp '.js|.html|bin'); do
-  #   [[ -f "$FILE" ]] && sh_fs is-same-file "$FILE" || :
+  #   [[ -f "$FILE" ]] && my_fs is-same-file "$FILE" || :
   # done
   echo "" > "$TEMP/CHANGE"
 
