@@ -22,7 +22,7 @@ module DA_STANDARD.COMMON
   }
 
   bool is_dev() {
-    if (typeof process !== 'undefined' && process.env.IS_DEV) {
+    if (typeof process !== 'undefined' && process.env.IS_DEVELOPMENT) {
       return true;
     }
 

@@ -79,7 +79,7 @@ case "$(echo $ACTION $@ | xargs echo)" in
     ;;
 
   run)
-    export IS_DEV="yes"
+    export IS_DEVELOPMENT="yes"
     CHANGED_FILE="${CHANGED_FILE:-}"
     reset
     if [[ "$CHANGED_FILE" == *"da_standard.cr" || "$CHANGED_FILE" == *".ecr" ]]; then
