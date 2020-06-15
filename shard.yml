@@ -4,5 +4,7 @@ version: 0.1.0
 dependencies:
   da_router:
     github: da99/da_router.cr
+  kemal:
+    github: kemalcr/kemal
   kemal-session:
     github: kemalcr/kemal-session
