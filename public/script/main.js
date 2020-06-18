@@ -1,11 +1,11 @@
 
-Handlers.watch_reload();
+Watch_Reload();
 
 function incr() {
   let node = id("the_count");
-  let new_total = parseInt(node.innerText) + 1;
-  update_text(node, new_total.toString());
-  console.log("Updated.");
+  let new_total = parseInt(node.text()) + 1;
+  node.text(new_total.toString());
+  console_log("Updated.");
   body(
     para(
       a_href(

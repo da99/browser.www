@@ -14,20 +14,6 @@ module DA_STANDARD.BROWSER
   } // void wait_max_specs
 
   void wait_max_seconds(int seconds, bool() func) {
-    int max      = seconds * 1000;
-    int current  = 0;
-    int interval = 150;
-
-    function reloop() {
-      current = current + interval;
-      if (func())
-        return true;
-      if (current >= max)
-        throw new Error('Timeout exceeded: ' + inspect(func) );
-      else
-        setTimeout(reloop, interval);
-    }
-    reloop();
   } // === void wait_max
 
 } // === module DA_STANDARD.BROWSER
