@@ -91,13 +91,6 @@ function html_unescape_all(raw) {
   return (new window.DOMParser().parseFromString(raw, "text/html")).documentElement.textContent;
 }
 
-var ID = {
-  last: -1,
-  next: function next(prefix = "") {
-    ID.last = ID.last + 1;
-    return trim(prefix) + ID.last.toString();
-  }
-};
 
 function dom_id(x) {
   let n = new NODE(x);
@@ -110,57 +103,21 @@ function dom_id(x) {
 }
 
 
-var DOC = {
-node: function node(s) {
-        return new DOC.NODE(document.querySelector(s));
-      },
-
-node_list: function node_list(s) {
-    return new DOC.NODE_LIST(document.querySelectorAll(s));
-  },
-
-add_event:  function add_event(event_name, selector, f) {
-              document.addEventListener(event_name, function (e) {
-                  if (!e.target.matches(selector))
-                  return; f(e);
-                  });
-            },
-NODE_LIST: function NODE_LIST() {
-  this.origin = null;
-
-  this.length = function length() {
-    return this.origin.length;
-  };
-
-  this.NODE_LIST(v) = function() {
-    this.origin = v;
-  };
-
-  this.item = function(i) {
-    return new DOC.NODE(this.origin[i]);
-  };
-
-  this.add_class = function(new_name) {
-    let l = this.origin.length;
-    for(let i = 0; i < l; i++) {
-      this.item(i).add_class(new_name);
-    }
-    return this;
-  };
-
-  this.remove_class = function(target) {
-    let l = this.origin.length;
-    for(let i = 0; i < l; i++) {
-      this.item(i).remove_class(target);
-    }
-    return this;
-  };
-
-} // class NodeList
-
+var ID = {
+  last: -1,
+  next: function next(prefix = "") {
+    ID.last = ID.last + 1;
+    return trim(prefix) + ID.last.toString();
+  }
 };
 
-function NODE(raw = undefined) {
+var DOC = {};
+
+// =============================================================================
+// === DOC.NODE
+// =============================================================================
+
+DOC.NODE = function NODE(raw = undefined) {
 
   this.origin = undefined;
   this.is_node = true;
@@ -186,7 +143,7 @@ function NODE(raw = undefined) {
     throw new Error("Invalid origin for NODE: " + to_string(v));
   }
 
-} // === function NODE
+}; // === function NODE
 
 NODE.prototype.append = function append() {
   for (let i = 1, j = arguments.length; i < j; i++){
@@ -202,26 +159,28 @@ NODE.prototype.append = function append() {
   return true;
 };
 
-NODE.prototype.exists = function exists(v) {
-  if (document.querySelector(v))
-    return true;
-  return false;
-};
+NODE.prototype.exists = function exists(str) { return !!(this.origin.querySelector(str)); };
+NODE.prototype.outer_html = function to_html() { return this.origin.outerHTML; };
+NODE.prototype.inner_html = function inner_html() { return this.origin.innerHTML; };
 
-NODE.prototype.html       = function html() { return this.origin.innerHTML; };
-NODE.prototype.outer_html = function outer_html() { return this.origin.outerHTML; };
-NODE.prototype.text       = function text() { return this.origin.textValue; };
+
+NODE.prototype.text = function text(x) {
+  if (arguments.length == 1) {
+    this.origin.textContent = arguments[0];
+  }
+  return this.origin.textContent;
+};
 
 NODE.prototype.show = function show() {
   this.origin.style.display = "";
   return this;
 };
 
-NODE.property.matches = function(raw) {
+NODE.property.matches = function(_args) {
   let names = "matches,matchesSelector,msMatchesSelector,webkitMatchesSelector".split(",");
   for (int i=0; i<names.length; i++) {
-    if (this.origin[names[i]])
-      return(this.origin[names[i]](raw));
+    let f = this.origin[names[i]];
+    if (f) { return(f.apply(this.origin, arguments)); }
   }
   return false;
 };
@@ -316,3 +275,47 @@ NODE.prototype.node_list = function (q) {
   return new NODE_LIST(this.origin.querySelectorAll(q));
 };
 
+
+// =============================================================================
+// === DOC.NODE.LIST
+// =============================================================================
+DOC.NODE.LIST = function NODE_LIST(raw) {
+  this.origin = undefined;
+
+  if (typeof raw === "object" && raw.constructor == NodeList) {
+    this.origin = raw;
+    return;
+  }
+
+  if (typeof raw === "string") {
+    this.origin = document.querySelectorAll(raw_query);
+    return;
+  }
+
+  if (!this.origin) {
+    throw new Error("Invalid origin for NODE.LIST: " + to_string(raw));
+  }
+
+}; // class NodeList
+
+Object.defineProperties(DOC.NODE.LIST, {
+  'length': { get: function length() { return this.origin.length; } }
+});
+
+DOC.NODE.LIST.prototype.item = function(i) { return new DOC.NODE(this.origin[i]); };
+
+DOC.NODE.LIST.prototype.add_class = function(new_name) {
+  let l = this.origin.length;
+  for(let i = 0; i < l; i++) {
+    this.item(i).add_class(new_name);
+  }
+  return this;
+};
+
+DOC.NODE.LIST.prototype.remove_class = function(target) {
+  let l = this.origin.length;
+  for(let i = 0; i < l; i++) {
+    this.item(i).remove_class(target);
+  }
+  return this;
+};
