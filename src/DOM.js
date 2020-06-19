@@ -1,14 +1,4 @@
 
-function update_text(node, x) {
-  switch (x.constructor) {
-    case String:
-      node.innerText = x;
-      break;
-    default:
-      console.log("Invalid value for DOM update.");
-  }
-  return node;
-} // func
 
 
 function body() {
@@ -240,6 +230,16 @@ NODE.prototype.has_attr = function (raw_name) {
   if (is_nothing(val) || is_empty(val))
     return false;
   return true;
+};
+
+NODE.prototype.prevent_default_event = function () {
+  let funcs = "stopPropagation,stopImmediatePropagation,preventDefault".split(",");
+  let x = this.origin;
+  for (let i = 0; i < funcs.length; i++) {
+    if (x[funcs[i]]) {
+      return x[funcs[i]]();
+    }
+  }
 };
 
 // Special cases:
