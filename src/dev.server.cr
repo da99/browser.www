@@ -30,7 +30,7 @@ get "/script/:raw_file" do |env|
   File.read("src/#{file_name}")
 end
 
-ws "/reload.txt" do |socket|
+ws "/reload.txt" do |socket, cxt|
   SOCKETS << socket
   socket.on_message { |message| puts "invalid message: #{message.inspect}" }
   socket.on_close { SOCKETS.delete socket }
