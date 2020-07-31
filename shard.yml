@@ -1,9 +1,9 @@
-name: da_standard
+name: browser.www
 version: 0.1.0
 
 dependencies:
-  da_router:
-    github: da99/da_router.cr
+  da_server:
+    github: da99/da_server
   kemal:
     github: kemalcr/kemal
   kemal-session:
