@@ -1,5 +1,4 @@
 
-require "kemal"
 require "da_server"
 
 class DHTML
@@ -8,12 +7,16 @@ class DHTML
   def call(env)
     case
     when env.request.path == "/"
-      print_index(env)
+      env.response.content_type = "text/html; charset=UTF-8"
+      env.response.print print_index(env)
 
     when env.request.path["/script/"]?
-      print_js_file(env)
+      env.response.content_type = "text/javascript; charset=UTF-8"
+      env.response.print print_js_file(env)
+
     else
       call_next env
+
     end # case
   end # def
 
@@ -41,8 +44,11 @@ s = DA_Server.new(
     HTTP::StaticFileHandler.new("public", false),
   ]
 )
+STDERR.puts "=== Starting server..."
+s.listen
 
 
+# require "kemal"
 # SOCKETS = [] of HTTP::WebSocket
 
 # spawn {
